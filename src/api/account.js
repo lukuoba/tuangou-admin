@@ -4,7 +4,7 @@ export default {
   //  登录
   login(data) {
     return request({
-      url: '/login',  // 接口路径
+      url: '/api/sys/user/backgroundUserLogin',  // 接口路径
       method: 'post',    // 请求方式
       data      // 请求参数
     })
@@ -12,7 +12,7 @@ export default {
   // 添加账号
   addCounts(data) {
     return request({
-      url: '/account',  // 接口路径
+      url: '/api/sys/user/addUser',  // 接口路径
       method: 'post',    // 请求方式
       data      // 请求参数
     })
@@ -20,7 +20,7 @@ export default {
   // 获取账号列表
   getUserList(params) {
     return request({
-      url: '/accountList',  // 接口路径
+      url: '/api/sys/user/selectUserList',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     })
@@ -36,10 +36,11 @@ export default {
   // 删除账号
   deleteCounts(id) {
     return request({
-      url: `/account/${id}`,  // 接口路径
+      url: `/api/sys/user/deleteUser`,  // 接口路径
       method: 'delete',    // 请求方式
+      data:{ids:id}
     })
-  },
+  }, 
   // 查询账号
   searchUsers(params) {
     return request({
@@ -58,7 +59,7 @@ export default {
   // 上传配置
   uploadConfig(params) {
     return request({
-      url: '/oss/sign',  // 接口路径
+      url: '/api/storage/oss/preSignUrl',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     }) 

@@ -32,8 +32,8 @@
     <!-- 分页区域 -->
     <div class="pagination-container">
       <el-pagination
-        v-model:current-page="pagination.currentPage"
-        v-model:page-size="pagination.pageSize"
+        v-model:current-page="pagination.page_num"
+        v-model:page-size="pagination.page_size"
         :page-sizes="[10, 20, 50, 100]"
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
@@ -62,8 +62,8 @@ const tableData = ref([]);
 const loading = ref(false);
 const total = ref(0);
 const pagination = ref({
-  currentPage: 1,
-  pageSize: 10,
+  page_num: 1,
+  page_size: 10,
 });
 
 // 执行请求方法（添加async/await）
@@ -72,8 +72,8 @@ const executeFetch = async () => {
     loading.value = true;
     const params = {
       ...props.requestParams,
-      pageNum: pagination.value.currentPage,
-      pageSize: pagination.value.pageSize,
+      page_num: pagination.value.page_num,
+      page_size: pagination.value.page_size,
     };
 
     const res = await props.fetchData(params);
@@ -97,7 +97,7 @@ const executeFetch = async () => {
 watch(
   () => [props.requestParams, props.fetchData], // 同时监听fetchData和requestParams
   () => {
-    pagination.value.currentPage = 1; // 重置页码
+    pagination.value.page_num = 1; // 重置页码
     executeFetch();
   },
   { deep: true, immediate: true }

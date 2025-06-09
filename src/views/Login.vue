@@ -9,9 +9,9 @@
       <el-tabs v-model="activeTab" stretch>
         <el-tab-pane label="账号登录" name="account">
           <el-form :model="accountForm" :rules="rules" ref="accountFormRef">
-            <el-form-item label="账号" prop="phone">
+            <el-form-item label="账号" prop="account">
               <el-input
-                v-model="accountForm.phone"
+                v-model="accountForm.account"
                 placeholder="请输入手机号"
               />
             </el-form-item>
@@ -81,7 +81,7 @@ const route = useRoute();
 
 // 账号登录表单
 const accountForm = ref({
-  phone: "",
+  account: "",
   password: "",
 });
 
@@ -100,7 +100,7 @@ const validatePhone = (rule, value, callback) => {
   }
 };
 const rules = {
-  phone: [
+  account: [
     { required: true, message: "请输入手机号码", trigger: "blur" },
     { validator: validatePhone, trigger: "blur" },
   ],
@@ -160,8 +160,7 @@ const handleAccountLogin = () => {
   accountFormRef.value.validate((valid) => {
     if (valid) {
       _http.login(accountForm.value).then((res) => {
-        localStorage.setItem("token", res.token);
-        localStorage.setItem("userRole", res.role);
+        localStorage.setItem("token", res.access_token);
         const redirect = route.query.redirect || "/";
         router.push(redirect);
       });
@@ -177,7 +176,6 @@ const handleSmsLogin = () => {
     if (valid) {
       _http.smsLogin(smsForm.value).then((res) => {
         localStorage.setItem("token", res.token);
-        localStorage.setItem("userRole", res.role);
         const redirect = route.query.redirect || "/";
         router.push(redirect);
       });

@@ -107,19 +107,21 @@ const beforeUpload: UploadProps["beforeUpload"] = (file) => {
 const handleUpload: UploadProps["httpRequest"] = async (options) => {
   try {
     // 1. 获取签名
-    const  {data}  = await _http.uploadConfig({
-      filename: options.file.name,
-      fileType: options.file.type,
+    const  data  = await _http.uploadConfig({
+      file_name: options.file.name,
+      // fileType: options.file.type,
     });
     console.log('上传data',data)
     
     // 2. 上传到OSS
-    await axios.put(data.signedUrl, options.file, {
+    await axios.put(data.pre_sign_url, options.file, {
       headers: {
-        "Content-Type": options.file.type,
-        'Origin': 'http://localhost:5173' 
+        "Content-Type": options.file.type || "application/octet-stream",
       },
+      // 添加withCredentials支持
+      withCredentials: false,
     });
+
 
     // 3. 更新文件列表
     fileList.value.push({

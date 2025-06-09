@@ -16,6 +16,26 @@ const constantRoutes = [
     path: '/forbidden',
     name: 'Forbidden',
     component: () => import('@/views/Forbidden.vue')
+  },
+  {
+    path:'/accounts',
+    name:'Accounts',
+    component:()=>import('../views/Accounts.vue'),
+    meta: {
+      title: '账号管理', // 路由中文名
+      icon: Avatar,  // 路由图标
+      roles: ['admin']
+    }
+  },
+  {
+    path:'/stores',
+    name:'Stores',
+    component:()=>import('../views/Stores.vue'),
+    meta: {
+      title: '店铺管理', // 路由中文名
+      icon: Avatar,  // 路由图标
+      
+    }
   }
 ]
 
@@ -39,16 +59,16 @@ const asyncRoutes = [
       icon: 'document',
     }
   },
-  {
-    path:'/accounts',
-    name:'Accounts',
-    component:()=>import('../views/Accounts.vue'),
-    meta: {
-      title: '账号管理', // 路由中文名
-      icon: Avatar,  // 路由图标
-      roles: ['admin']
-    }
-  },
+  // {
+  //   path:'/accounts',
+  //   name:'Accounts',
+  //   component:()=>import('../views/Accounts.vue'),
+  //   meta: {
+  //     title: '账号管理', // 路由中文名
+  //     icon: Avatar,  // 路由图标
+  //     roles: ['admin']
+  //   }
+  // },
   {
     path:'/stores',
     name:'Stores',
@@ -87,8 +107,6 @@ function mergeRouteMeta(routes) {
 }
 
 export function setupRoutes(userRole) {
-  console.log('当前用户角色:', userRole)
-  
   const accessibleRoutes = mergeRouteMeta(asyncRoutes).filter(route => {
     const hasPermission = route.meta.requiresAuth || route.meta.roles.includes(userRole)
     console.log(`路由 ${route.path} 权限:`, hasPermission)

@@ -2,10 +2,10 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import router from '@/router' // 确保已正确配置路由实例
-
+const baseURL = import.meta.env.VITE_API_BASE_URL || '';
 // 创建axios实例
 const request = axios.create({
-  baseURL:  'http://localhost:3000/api',
+  baseURL:  baseURL,
   timeout: 10000,
 })
 

@@ -28,13 +28,13 @@
         >
       </el-form>
 
-      <SmartTable
+      <!-- <SmartTable
         ref="smartTableRef"
         :fetch-data="fetchUserList"
         :request-params="searchParams"
         :columns="columns"
       >
-      </SmartTable>
+      </SmartTable> -->
     </div>
   </div>
 </template>

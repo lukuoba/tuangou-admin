@@ -31,7 +31,6 @@ const handleProfile = () => {
 const handleLogout = () => {
   // 清除 token 和用户信息
   localStorage.removeItem("token");
-  localStorage.removeItem("userRole");
 
   // 跳转到登录页
   router.push("/login");
