@@ -23,31 +23,30 @@
               />
             </el-form-item>
             <el-form-item class="login-button-item">
-              <el-button type="primary" @click="handleAccountLogin">登录</el-button>
+              <el-button
+                type="primary"
+                @click="handleAccountLogin"
+                :loading="loading"
+                >登录</el-button
+              >
             </el-form-item>
           </el-form>
         </el-tab-pane>
         <el-tab-pane label="验证码登录" name="sms">
           <el-form :model="smsForm" :rules="smsRules" ref="smsFormRef">
             <el-form-item label="手机号" prop="phone">
-              <el-input
-                v-model="smsForm.phone"
-                placeholder="请输入手机号"
-              />
+              <el-input v-model="smsForm.phone" placeholder="请输入手机号" />
             </el-form-item>
             <el-form-item label="验证码" prop="code">
               <el-row :gutter="10">
                 <el-col :span="16">
-                  <el-input
-                    v-model="smsForm.code"
-                    placeholder="请输入验证码"
-                  />
+                  <el-input v-model="smsForm.code" placeholder="请输入验证码" />
                 </el-col>
                 <el-col :span="8">
                   <el-button
                     :disabled="isCodeDisabled"
                     @click="sendVerificationCode"
-                    style="width: 100%;"
+                    style="width: 100%"
                   >
                     {{ codeButtonText }}
                   </el-button>
@@ -72,19 +71,21 @@
 
 <script setup>
 import { ref } from "vue";
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from "vue-router";
 import _http from "@/api/account";
-
+import { setToken } from "@/utils/auth";
 const activeTab = ref("account");
 const router = useRouter();
 const route = useRoute();
-
+import Http_s from "@/api/admin";
+import { initDynamicRoutes } from "@/router";
+import { ElMessage } from "element-plus";
 // 账号登录表单
 const accountForm = ref({
   account: "",
   password: "",
 });
-
+const loading = ref(false);
 // 验证码登录表单
 const smsForm = ref({
   phone: "",
@@ -122,12 +123,10 @@ const isCodeDisabled = ref(false); // 是否禁用验证码按钮
 const codeButtonText = ref("获取验证码"); // 按钮文字
 let countdown = 60; // 倒计时秒数
 
-
-
 // 获取验证码
 const sendVerificationCode = async () => {
   if (!/^1[3-9]\d{9}$/.test(smsForm.value.phone)) {
-    return this.$message.error('请输入正确的手机号');
+    return this.$message.error("请输入正确的手机号");
   }
 
   isCodeDisabled.value = true;
@@ -151,23 +150,43 @@ const sendVerificationCode = async () => {
     isCodeDisabled.value = false;
     countdown = 60;
     codeButtonText.value = "获取验证码";
-    this.$message.error('验证码发送失败');
+    this.$message.error("验证码发送失败");
   }
 };
 
 // 账号密码登录
-const handleAccountLogin = () => {
-  accountFormRef.value.validate((valid) => {
-    if (valid) {
-      _http.login(accountForm.value).then((res) => {
-        localStorage.setItem("token", res.access_token);
-        const redirect = route.query.redirect || "/";
-        router.push(redirect);
-      });
-    } else {
-      console.log("表单校验失败");
+const handleAccountLogin = async () => {
+  // accountFormRef.value.validate((valid) => {
+  //   if (valid) {
+  try {
+    loading.value = true;
+    const loginRes = await _http.login(accountForm.value);
+    setToken(loginRes.access_token);
+    // 2. 获取菜单
+    const menuRes = await Http_s.getMenuList();
+    const menuData = menuRes.list;
+    // 存储菜单数据到localStorage
+    localStorage.setItem("menuData", JSON.stringify(menuData));
+
+    // 3. 初始化动态路由
+    const success = await initDynamicRoutes();
+    console.log('success', success)
+    if (!success) {
+      ElMessage.error("路由初始化失败");
+      return;
     }
-  });
+
+    // 4. 跳转到首页
+    ElMessage.success("登录成功");
+    router.push("/");
+  } catch (error) {
+    console.error("登录失败:", error);
+    ElMessage.error("登录失败，请重试");
+  } finally {
+    loading.value = false;
+  }
+  // }
+  // })
 };
 
 // 手机验证码登录

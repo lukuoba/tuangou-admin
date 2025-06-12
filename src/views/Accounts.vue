@@ -21,6 +21,16 @@
         <el-form-item label="手机号码">
           <el-input v-model="searchForm.phone" />
         </el-form-item>
+        <el-form-item label="用户名称">
+          <el-input v-model="searchForm.user_name" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="searchForm.user_status" placeholder="请选择状态" >
+            <el-option label="全部" :value="-1" />
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
+          </el-select>
+        </el-form-item>
         <el-form-item
           ><el-button type="primary" native-type="submit"
             >搜索</el-button
@@ -51,7 +61,9 @@ const dialogTitle = ref("");
 const dialogId = ref("");
 const dialogData = ref({});
 const searchForm = reactive({
+  user_status: -1, 
   phone: "", // 手机号码
+  user_name:"",//用户名
 });
 const smartTableRef = ref(null);
 // 账户列表title
@@ -199,8 +211,8 @@ const searchParams = ref({});
 // 初始化时触发请求
 onMounted(() => {
   // 初始化搜索参数（如果需要）
-  // searchParams.value = { ...searchForm };
-  // fetchUserList();
+  searchParams.value = { ...searchForm };
+  fetchUserList();
 });
 // 请求方法（由父组件实现）
 const fetchUserList = async (params) => {

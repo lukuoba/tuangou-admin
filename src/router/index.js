@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { Avatar}  from '@element-plus/icons-vue'
+import { Avatar, Tickets, Star, Document } from '@element-plus/icons-vue'
 
 // 公共路由（不需要权限）
 const constantRoutes = [
@@ -8,8 +8,7 @@ const constantRoutes = [
     name: 'Login',
     component: () => import('@/views/Login.vue'),
     meta: {
-      fullScreen: true,  // 添加全屏标记
-      requiresAuth: false // 需要登录
+      requiresAuth: false
     }
   },
   {
@@ -18,112 +17,151 @@ const constantRoutes = [
     component: () => import('@/views/Forbidden.vue')
   },
   {
-    path:'/accounts',
-    name:'Accounts',
-    component:()=>import('../views/Accounts.vue'),
-    meta: {
-      title: '账号管理', // 路由中文名
-      icon: Avatar,  // 路由图标
-      roles: ['admin']
-    }
+    path: '/404',
+    name: 'NotFound',
+    component: () => import('@/views/404.vue')
   },
   {
-    path:'/stores',
-    name:'Stores',
-    component:()=>import('../views/Stores.vue'),
-    meta: {
-      title: '店铺管理', // 路由中文名
-      icon: Avatar,  // 路由图标
-      
-    }
-  }
-]
-
-// 动态路由（需要权限）
-const asyncRoutes = [
+    path: '/:pathMatch(.*)*', // 默认404路由
+    redirect: '/login'
+  },
   {
-    path: '/',
+    path: '/manage',
     name: 'Home',
-    component: () => import('@/views/Home.vue'),
+    component: () => import('@/views/Menumanage.vue'),
     meta: {
-      title: '首页',
-      icon: 'home'
-    }
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: () => import('@/views/About.vue'),
-    meta: {
-      title: '关于',
-      icon: 'document',
-    }
-  },
-  // {
-  //   path:'/accounts',
-  //   name:'Accounts',
-  //   component:()=>import('../views/Accounts.vue'),
-  //   meta: {
-  //     title: '账号管理', // 路由中文名
-  //     icon: Avatar,  // 路由图标
-  //     roles: ['admin']
-  //   }
-  // },
-  {
-    path:'/stores',
-    name:'Stores',
-    component:()=>import('../views/Stores.vue'),
-    meta: {
-      title: '店铺管理', // 路由中文名
-      icon: Avatar,  // 路由图标
-      roles: ['admin']
+      title: '权限管理',
+      icon: Star,
+      requiresAuth: true
     }
   }
 ]
-
-
-// ...（前面的路由配置）
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: constantRoutes // 初始只加载公共路由
+  routes: constantRoutes
 })
 
-// 默认路由meta配置
-const DEFAULT_META = {
-  requiresAuth: true,
-  roles: ['admin', 'common', 'vip', 'special']
+// 图标映射表
+const iconMap = {
+  'Start': Star,
+  'Share': Avatar,
+  'Tickets': Tickets,
+  'Document': Document
+  // 添加更多图标映射
 }
 
-// 合并默认meta配置
-function mergeRouteMeta(routes) {
-  return routes.map(route => {
-    route.meta = {
-      ...DEFAULT_META,
-      ...route.meta
+// 存储动态路由状态
+let isDynamicRoutesAdded = false
+let dynamicRouteNames = []
+
+/**
+ * 转换后端菜单数据为路由配置
+ * @param {Array} menuList 后端返回的菜单列表
+ * @returns {Array} 路由配置数组
+ */
+export function convertMenusToRoutes(menuList) {
+  const routes = []
+  
+  menuList.forEach(menu => {
+    // 只处理启用的菜单
+    if (menu.menu_status !== 1) return;
+    
+    const route = {
+      path: menu.menu_path,
+      name: menu.menu_name.replace(/\s+/g, '_') + '_' + menu.id, // 确保name唯一
+      meta: {
+        title: menu.menu_name,
+        icon: iconMap[menu.menu_icon] || Avatar,
+        menuId: menu.id,
+        parentId: menu.parent_id,
+        isDirectory: menu.menu_component === 'NONE' && menu.children_list?.length > 0
+      }
     }
-    return route
+    
+    // 处理组件
+    if (menu.menu_component && menu.menu_component !== 'NONE') {
+      // 动态导入组件
+      try {
+        route.component = () => import(/* @vite-ignore */ menu.menu_component)
+      } catch (e) {
+        console.error(`组件加载失败: ${menu.menu_component}`, e)
+        route.redirect = '/404'
+      }
+    } else if (menu.children_list?.length) {
+      // 有子菜单的布局组件
+      route.component = () => import('@/views/layout/index.vue')
+    } else {
+      // 默认重定向到404
+      route.redirect = '/404'
+    }
+    
+    // 递归处理子菜单
+    if (menu.children_list?.length) {
+      route.children = convertMenusToRoutes(menu.children_list)
+    }
+    
+    routes.push(route)
   })
+  
+  return routes
 }
 
-export function setupRoutes(userRole) {
-  const accessibleRoutes = mergeRouteMeta(asyncRoutes).filter(route => {
-    const hasPermission = route.meta.requiresAuth || route.meta.roles.includes(userRole)
-    console.log(`路由 ${route.path} 权限:`, hasPermission)
-    return hasPermission
-  })
+/**
+ * 添加动态路由
+ * @param {Array} dynamicRoutes 动态路由配置
+ */
+export function addDynamicRoutes(dynamicRoutes) {
+  // 先移除之前添加的动态路由
+  removeDynamicRoutes()
   
-  console.log('可访问路由:', accessibleRoutes)
-  
-  accessibleRoutes.forEach(route => {
+  // 添加新的动态路由
+  dynamicRoutes.forEach(route => {
     if (!router.hasRoute(route.name)) {
       router.addRoute(route)
+      dynamicRouteNames.push(route.name)
       console.log('已添加路由:', route.name)
     }
   })
   
-  // 打印当前路由表
-  console.log('当前路由表:', router.getRoutes())
+  isDynamicRoutesAdded = true
+}
+
+/**
+ * 移除所有动态路由
+ */
+export function removeDynamicRoutes() {
+  if (!isDynamicRoutesAdded) return
+  
+  dynamicRouteNames.forEach(name => {
+    if (router.hasRoute(name)) {
+      router.removeRoute(name)
+    }
+  })
+  
+  dynamicRouteNames = []
+  isDynamicRoutesAdded = false
+  console.log('已移除所有动态路由')
+}
+
+/**
+ * 初始化动态路由
+ */
+export async function initDynamicRoutes() {
+  // 从localStorage获取菜单数据
+  const menuData = localStorage.getItem('menuData')
+  if (menuData) {
+    try {
+      const parsedData = JSON.parse(menuData)
+      const dynamicRoutes = convertMenusToRoutes(parsedData)
+      addDynamicRoutes(dynamicRoutes)
+      return true
+    } catch (e) {
+      console.error('菜单数据解析失败:', e)
+      return false
+    }
+  }
+  return false
 }
 
 export default router
