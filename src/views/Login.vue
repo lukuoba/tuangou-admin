@@ -156,9 +156,11 @@ const sendVerificationCode = async () => {
 
 // 账号密码登录
 const handleAccountLogin = async () => {
-  // accountFormRef.value.validate((valid) => {
-  //   if (valid) {
   try {
+    const valid = await accountFormRef.value.validate();
+    if (!valid) {
+      return;
+    }
     loading.value = true;
     const loginRes = await _http.login(accountForm.value);
     setToken(loginRes.access_token);
@@ -185,8 +187,6 @@ const handleAccountLogin = async () => {
   } finally {
     loading.value = false;
   }
-  // }
-  // })
 };
 
 // 手机验证码登录

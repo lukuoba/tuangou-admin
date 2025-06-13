@@ -62,51 +62,83 @@ let dynamicRouteNames = []
  */
 export function convertMenusToRoutes(menuList) {
   const routes = []
-  
   menuList.forEach(menu => {
     // 只处理启用的菜单
     if (menu.menu_status !== 1) return;
-    
+    // 处理目录菜单（menu_path 为 "no" 的情况）
+    const isDirectory = menu.menu_path.toLowerCase() === 'no' &&
+      menu.menu_component === 'NONE' &&
+      menu.children_list?.length > 0;
+
+    // 确保路径以斜杠开头，特殊处理目录菜单
+    let normalizedPath = menu.menu_path;
+    // if (!isDirectory) {
+    //   if (normalizedPath === '/') {
+    //     normalizedPath = '/home'; // 根路径改为/home
+    //   } else if (!normalizedPath.startsWith('/')) {
+    //     normalizedPath = '/' + normalizedPath;
+    //   }
+    // }
+
+    // 确保路由名称有效
+    const routeName = menu.menu_name
+      ? `${menu.menu_name.replace(/\s+/g, '_')}_${menu.id}`
+      : `route_${menu.id}`;
+
     const route = {
-      path: menu.menu_path,
-      name: menu.menu_name.replace(/\s+/g, '_') + '_' + menu.id, // 确保name唯一
+      path: isDirectory ? undefined : '/' + normalizedPath, // 目录菜单不设置路径
+      name: routeName, // 目录菜单不需要名称
       meta: {
         title: menu.menu_name,
         icon: iconMap[menu.menu_icon] || Avatar,
         menuId: menu.id,
         parentId: menu.parent_id,
-        isDirectory: menu.menu_component === 'NONE' && menu.children_list?.length > 0
+        isDirectory // 标记是否为目录菜单
       }
     }
-    
+
     // 处理组件
-    if (menu.menu_component && menu.menu_component !== 'NONE') {
+    if (isDirectory) {
+      // 目录菜单使用布局组件
+      // route.component = () => import('@/views/layout/index.vue')
+      console.log('目录菜单:', menu)
+    } else if (menu.menu_component !== 'NONE') {
       // 动态导入组件
       try {
-        route.component = () => import(/* @vite-ignore */ menu.menu_component)
+        const componentPath = menu.menu_component.replace('@/', '/src/')
+        route.component = () => import(/* @vite-ignore */ componentPath)
       } catch (e) {
         console.error(`组件加载失败: ${menu.menu_component}`, e)
         route.redirect = '/404'
       }
-    } else if (menu.children_list?.length) {
-      // 有子菜单的布局组件
-      route.component = () => import('@/views/layout/index.vue')
     } else {
       // 默认重定向到404
       route.redirect = '/404'
     }
-    
+
     // 递归处理子菜单
     if (menu.children_list?.length) {
-      route.children = convertMenusToRoutes(menu.children_list)
+      const childRoutes = convertMenusToRoutes(menu.children_list)
+
+      if (isDirectory) {
+        // 目录菜单的子路由
+        route.children = childRoutes
+
+        // 为目录菜单设置默认重定向到第一个子路由
+        if (childRoutes.length > 0 && childRoutes[0].path) {
+          route.redirect = childRoutes[0].path
+        }
+      } else {
+        // 普通菜单的子路由
+        route.children = childRoutes
+      }
     }
-    
+
     routes.push(route)
   })
-  
+
   return routes
 }
-
 /**
  * 添加动态路由
  * @param {Array} dynamicRoutes 动态路由配置
@@ -114,16 +146,17 @@ export function convertMenusToRoutes(menuList) {
 export function addDynamicRoutes(dynamicRoutes) {
   // 先移除之前添加的动态路由
   removeDynamicRoutes()
-  
+  console.log('动态路由配置11111:', dynamicRoutes)
   // 添加新的动态路由
   dynamicRoutes.forEach(route => {
     if (!router.hasRoute(route.name)) {
       router.addRoute(route)
       dynamicRouteNames.push(route.name)
+      console.log('动态路由配置:', dynamicRouteNames)
       console.log('已添加路由:', route.name)
     }
   })
-  
+
   isDynamicRoutesAdded = true
 }
 
@@ -132,13 +165,13 @@ export function addDynamicRoutes(dynamicRoutes) {
  */
 export function removeDynamicRoutes() {
   if (!isDynamicRoutesAdded) return
-  
+
   dynamicRouteNames.forEach(name => {
     if (router.hasRoute(name)) {
       router.removeRoute(name)
     }
   })
-  
+
   dynamicRouteNames = []
   isDynamicRoutesAdded = false
   console.log('已移除所有动态路由')
@@ -150,10 +183,12 @@ export function removeDynamicRoutes() {
 export async function initDynamicRoutes() {
   // 从localStorage获取菜单数据
   const menuData = localStorage.getItem('menuData')
+  console.log('从localStorage获取的菜单数据:', menuData)
   if (menuData) {
     try {
       const parsedData = JSON.parse(menuData)
       const dynamicRoutes = convertMenusToRoutes(parsedData)
+      console.log('转换后的动态路由:', dynamicRoutes)
       addDynamicRoutes(dynamicRoutes)
       return true
     } catch (e) {

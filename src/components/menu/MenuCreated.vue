@@ -81,7 +81,6 @@ const form = ref({
   menu_component: "",
   // password: "123456", // 默认密码
   sort_no: 1, // 默认状态
-  user_key: "",
   parent_id: 0, // 0父级
   menu_status: 1, // 默认状态
   menu_type: 1, // 0->父级；1->子菜单
@@ -128,7 +127,6 @@ const openDialog = () => {
       menu_component: "",
       // password: "123456", // 默认密码
       sort_no: 1, // 默认状态
-      user_key: "",
       parent_id: 0, // 0父级
       menu_status: 1, // 默认状态
       menu_type: 1, // 0->父级；1->子菜单

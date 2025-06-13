@@ -1,17 +1,22 @@
 <template>
-  <div>
-    <Layout v-if="showLayout" />
-    <router-view :class="showLayout ? 'router-view' : 'router-view-full'" />
+  <div class="main-box">
+    <div class="left-box" v-if="showLayout" >
+      <SideBar />
+    </div>
+    <div class="header-top"  v-if="showLayout">
+      <HeaderTop />
+      <router-view :class="showLayout ? 'router-view' : 'router-view-full'" />   
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import Layout from "@/views/layout/index.vue";
+import SideBar from "@/components/SideBar.vue";
 import { checkLoginStatus } from "@/utils/auth";
 import { initDynamicRoutes } from "@/router";
-
+import HeaderTop from "./components/Header.vue"
 const route = useRoute();
 const showLayout = ref(false);
 const isLoggedIn = ref(false);
@@ -19,7 +24,7 @@ const isLoggedIn = ref(false);
 // 初始化应用
 const initApp = async () => {
   isLoggedIn.value = checkLoginStatus();
-  
+  console.log("isLoggedIn",isLoggedIn.value);
   if (isLoggedIn.value) {
     // 初始化动态路由
     const success = await initDynamicRoutes();
@@ -49,5 +54,32 @@ onMounted(initApp);
 </script>
 
 <style>
-/* 原有样式保持不变 */
+.main-box {
+  display: flex;
+  height: 100vh;
+}
+/* 常规页面样式 */
+.router-view {
+  margin:10px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+.left-box {
+  width: 220px;
+  height: 100vh;
+  background-color: #001529;
+}
+.header-top {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  width: calc(100% - 220px);
+  /* padding: 0 20px; */
+  height: 61px;
+}
+/* 全屏页面样式 */
+.router-view-full {
+  margin: 0;
+  width: 100%;
+  height: 100vh;
+}
 </style>
