@@ -3,8 +3,8 @@
     <div class="left-box" v-if="showLayout" >
       <SideBar />
     </div>
-    <div class="header-top"  v-if="showLayout">
-      <HeaderTop />
+    <div>
+      <HeaderTop v-if="showLayout"/>
       <router-view :class="showLayout ? 'router-view' : 'router-view-full'" />   
     </div>
   </div>
@@ -45,6 +45,7 @@ watch(
   (newPath) => {
     if (isLoggedIn.value) {
       showLayout.value = newPath !== "/login"; 
+      console.log("newPath",showLayout.value);
     }
   }
 );
@@ -56,6 +57,7 @@ onMounted(initApp);
 <style>
 .main-box {
   display: flex;
+  width: 100%;
   height: 100vh;
 }
 /* 常规页面样式 */
@@ -68,13 +70,6 @@ onMounted(initApp);
   width: 220px;
   height: 100vh;
   background-color: #001529;
-}
-.header-top {
-  background-color: #fff;
-  border-bottom: 1px solid #ccc;
-  width: calc(100% - 220px);
-  /* padding: 0 20px; */
-  height: 61px;
 }
 /* 全屏页面样式 */
 .router-view-full {
