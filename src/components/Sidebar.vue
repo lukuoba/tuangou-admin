@@ -1,3 +1,4 @@
+<!-- src/components/SideBar.vue -->
 <template>
   <div class="left-side">
     <div class="logo-container">
@@ -6,18 +7,20 @@
     <el-menu
       :default-active="activeMenu"
       :unique-opened="true"
-      :collapse="false"
       router
       background-color="#001529"
       text-color="#bfcbd9"
       active-text-color="#409EFF"
     >
-      <template v-for="item in menuList" :key="item.id">
+      <template v-for="item in filteredMenuList" :key="item.id">
         <!-- 有子菜单的项 -->
-        <el-sub-menu v-if="item.children_list" :index="item.menu_path">
+        <el-sub-menu 
+          v-if="item.children_list && item.children_list.length"
+          :index="item.menu_path"
+        >
           <template #title>
-            <el-icon v-if="item.menu_icon">
-              <component :is="item.menu_icon" />
+            <el-icon>
+              <component :is="iconMap[item.menu_icon]" />
             </el-icon>
             <span>{{ item.menu_name }}</span>
           </template>
@@ -26,17 +29,20 @@
             :key="child.id"
             :index="child.menu_path"
           >
-            <el-icon v-if="child.menu_icon">
-              <component :is="child.menu_icon" />
+            <el-icon>
+              <component :is="iconMap[child.menu_icon]" />
             </el-icon>
             <span>{{ child.menu_name }}</span>
           </el-menu-item>
         </el-sub-menu>
 
         <!-- 没有子菜单的项 -->
-        <el-menu-item v-else :index="item.menu_path">
-          <el-icon v-if="item.menu_icon">
-            <component :is="item.menu_icon" />
+        <el-menu-item 
+          v-else 
+          :index="item.menu_path"
+        >
+          <el-icon>
+            <component :is="iconMap[item.menu_icon]" />
           </el-icon>
           <span>{{ item.menu_name }}</span>
         </el-menu-item>
@@ -47,47 +53,54 @@
 
 <script setup>
 import { useRoute } from "vue-router";
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
+import {
+  Star, Avatar, Tickets, Document, User, Building
+} from '@element-plus/icons-vue';
 
 const route = useRoute();
-
 const menuList = ref([]);
 
-// 初始化
-onMounted(() => {
-  loadMenuData();
+// 图标映射
+const iconMap = {
+  'Start': Star,
+  'Share': Avatar,
+  'Tickets': Tickets,
+  'Document': Document,
+  'User': Avatar,
+  'Building': Building
+}
+
+// 过滤隐藏的菜单项
+const filteredMenuList = computed(() => {
+  return menuList.value.filter(item => 
+    item.is_hide_menu === 0 && 
+    (item.children_list ? item.children_list.some(child => child.is_hide_menu === 0) : true)
+  );
 });
-const props = defineProps({
-  menuList: {
-    type: Array,
-    default: () => [],
-  },
-  activeMenu: {
-    type: String,
-    default: "",
-  },
-});
+
+// 当前激活的菜单
+const activeMenu = computed(() => route.path);
+
 // 获取菜单数据
 const loadMenuData = () => {
   const menuData = localStorage.getItem("menuData");
   if (menuData) {
     try {
-      const parsedData = JSON.parse(menuData);
-      console.log("从localStorage加载的菜单数据:", parsedData);
-      menuList.value = parsedData;
-      console.log("菜单数据加载成功:", menuList.value);
+      menuList.value = JSON.parse(menuData);
     } catch (e) {
       console.error("菜单数据解析失败:", e);
     }
   }
 };
 
-// 当前激活的菜单
-const activeMenu = computed(() => {
-  const { meta, path } = route;
-  return meta.activeMenu || path;
-});
+// 初始化加载菜单
+loadMenuData();
 </script>
+
+<style scoped>
+/* 保持原有样式不变 */
+</style>
 <style scoped>
 .left-side {
   width: 220px;

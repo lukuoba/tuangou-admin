@@ -1,80 +1,34 @@
 <template>
-  <div class="main-box">
-    <div class="left-box" v-if="showLayout" >
-      <SideBar />
-    </div>
-    <div>
-      <HeaderTop v-if="showLayout"/>
-      <router-view :class="showLayout ? 'router-view' : 'router-view-full'" />   
-    </div>
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import SideBar from "@/components/SideBar.vue";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { checkLoginStatus } from "@/utils/auth";
 import { initDynamicRoutes } from "@/router";
-import HeaderTop from "./components/Header.vue"
-const route = useRoute();
-const showLayout = ref(false);
-const isLoggedIn = ref(false);
+
+const router = useRouter();
 
 // 初始化应用
 const initApp = async () => {
-  isLoggedIn.value = checkLoginStatus();
-  console.log("isLoggedIn",isLoggedIn.value);
-  if (isLoggedIn.value) {
-    // 初始化动态路由
+  const isLoggedIn = checkLoginStatus();
+  
+  if (isLoggedIn) {
+    // 尝试初始化动态路由
     const success = await initDynamicRoutes();
-    console.log("初始化动态路由成功",success);
-    if (success) {
-      showLayout.value = true;
-    } else {
-      console.log("初始化动态路由失败");
+    
+    // 如果当前在登录页，跳转到首页
+    if (router.currentRoute.value.path === '/login') {
+      router.replace('/home');
     }
   } else {
-    showLayout.value = false;
+    // 未登录时重定向到登录页
+    if (router.currentRoute.value.path !== '/login') {
+      router.replace('/login');
+    }
   }
 };
 
-// 监听路由变化
-watch(
-  () => route.path,
-  (newPath) => {
-    if (isLoggedIn.value) {
-      showLayout.value = newPath !== "/login"; 
-      console.log("newPath",showLayout.value);
-    }
-  }
-);
-
-// 初始化
 onMounted(initApp);
 </script>
-
-<style>
-.main-box {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-}
-/* 常规页面样式 */
-.router-view {
-  margin:10px;
-  height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-.left-box {
-  width: 220px;
-  height: 100vh;
-  background-color: #001529;
-}
-/* 全屏页面样式 */
-.router-view-full {
-  margin: 0;
-  width: 100%;
-  height: 100vh;
-}
-</style>

@@ -9,11 +9,6 @@ import './assets/commonStyls.css'
 // if (role) {
 //   setupRoutes(role)
 // }
-router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !localStorage.getItem('token')) {
-    return '/login'
-  }
-})
 const app = createApp(App)
 app.use(ElementPlus)
 app.use(router)
