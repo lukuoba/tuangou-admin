@@ -180,7 +180,7 @@ const handleAccountLogin = async () => {
 
     // 4. 跳转到首页
     ElMessage.success("登录成功");
-    router.push("/home");
+    router.push("/");
   } catch (error) {
     console.error("登录失败:", error);
     ElMessage.error("登录失败，请重试");

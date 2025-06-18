@@ -8,7 +8,7 @@
       <!-- 根据 hideMenu 控制顶部栏显示 -->
       <HeaderTop v-if="!hideMenu" />
       
-      <router-view />
+      <router-view  style="margin: 20px;"/>
     </div>
   </div>
 </template>

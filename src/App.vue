@@ -13,19 +13,20 @@ const router = useRouter();
 // 初始化应用
 const initApp = async () => {
   const isLoggedIn = checkLoginStatus();
-  
+
   if (isLoggedIn) {
     // 尝试初始化动态路由
     const success = await initDynamicRoutes();
-    
-    // 如果当前在登录页，跳转到首页
-    if (router.currentRoute.value.path === '/login') {
-      router.replace('/home');
-    }
-  } else {
-    // 未登录时重定向到登录页
-    if (router.currentRoute.value.path !== '/login') {
-      router.replace('/login');
+    if (success) {
+      // 如果当前在登录页，跳转到首页
+      if (router.currentRoute.value.path === "/login") {
+        router.replace("/home");
+      }
+    } else {
+      // 未登录时重定向到登录页
+      if (router.currentRoute.value.path !== "/login") {
+        router.replace("/login");
+      }
     }
   }
 };

@@ -55,7 +55,7 @@
 import { useRoute } from "vue-router";
 import { ref, computed } from "vue";
 import {
-  Star, Avatar, Tickets, Document, User, Building
+  Star, Avatar, Tickets, Document, User
 } from '@element-plus/icons-vue';
 
 const route = useRoute();
@@ -67,8 +67,7 @@ const iconMap = {
   'Share': Avatar,
   'Tickets': Tickets,
   'Document': Document,
-  'User': Avatar,
-  'Building': Building
+  'User': User,
 }
 
 // 过滤隐藏的菜单项

@@ -1,88 +1,78 @@
 // router/index.js
-import { createRouter, createWebHistory } from 'vue-router'
-import { Avatar, Tickets, Star, Document } from '@element-plus/icons-vue'
-import { checkLoginStatus } from "@/utils/auth";
 
-// 公共路由（不需要权限）
-const constantRoutes = [
+import { createRouter, createWebHistory } from 'vue-router';
+import Login from '@/views/Login.vue';
+import Layout from '@/views/Layout/index.vue';
+import _http from '@/api/admin.js';
+
+export const staticRoutes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/Login.vue'),
-    meta: { requiresAuth: false }
+    component: Login,
+  },
+  {
+    path: '/',
+    name: 'Layout',
+    component: Layout,
+    redirect: '/home',
+    children: [],
   },
   {
     path: '/forbidden',
     name: 'Forbidden',
     component: () => import('@/views/Forbidden.vue'),
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/404',
     name: 'NotFound',
     component: () => import('@/views/404.vue'),
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/404'
-  }
-]
+    name: 'CatchAll',
+    redirect: '/404',
+  },
+];
+
+
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: constantRoutes
-})
+  routes: staticRoutes,
+});
 
-// 图标映射表
-const iconMap = {
-  'Start': Star,
-  'Share': Avatar,
-  'Tickets': Tickets,
-  'Document': Document,
-  'User': Avatar,
-  'Building': Avatar
-}
+// 转换菜单为动态路由
+export function transformMenuToRoutes(menuList) {
+  if (!Array.isArray(menuList)) {
+    console.warn('菜单数据不是数组：', menuList);
+    return [];
+  }
 
-// 存储动态路由状态
-let isDynamicRoutesAdded = false
+  // const modules = import.meta.glob('@/views/**/*.vue');
 
-/**
- * 转换后端菜单数据为路由配置
- * @param {Array} menuList 后端返回的菜单列表
- * @returns {Array} 路由配置数组
- */
-export function convertMenusToRoutes(menuList) {
-  const routes = []
-  
-  menuList.forEach(menu => {
-    // 只处理启用的菜单
-    if (menu.menu_status !== 1) return
-    
-    // 处理特殊路径
-    let normalizedPath = menu.menu_path;
-    if (normalizedPath === '/') {
-      normalizedPath = '/home'; // 根路径转换为/home
-    }
-    
-    // 创建路由对象
+  const convert = (menu) => {
+    const hasChildren = Array.isArray(menu.children_list) && menu.children_list.length > 0;
+    const isDirectory = menu.menu_path.toLowerCase() === 'no' &&
+                        menu.menu_component === 'NONE' &&
+                        menu.children_list?.length > 0
     const route = {
-      path: menu.menu_path === 'no' ? '' : normalizedPath, // 目录菜单使用空路径
-      name: `${menu.menu_name.replace(/\s+/g, '_')}_${menu.id}`,
+      path: menu.menu_path === 'no' ? `/no-${menu.id}` : menu.menu_path,
+      name: `Route${menu.id}`,
       meta: {
         title: menu.menu_name,
-        icon: iconMap[menu.menu_icon] || Avatar,
-        menuId: menu.id,
-        parentId: menu.parent_id,
-        isDirectory: menu.menu_path === 'no',
-        hideMenu: menu.is_hide_menu === 1
-      }
-    }
-
-    // 处理组件
-    if (menu.menu_path === 'no') {
+        icon: menu.menu_icon,
+        hiddenLayout: menu.is_hide_menu === 1,
+      },
+      redirect: undefined,
+      component: undefined,
+      children: [],
+    };
+    if (isDirectory) {
       // 目录菜单使用布局组件
-      route.component = () => import('@/views/layout/index.vue')
+      route.component = () => import('@/views/layout/ParentView.vue');
     } else if (menu.menu_component !== 'NONE') {
       // 动态导入组件
       try {
@@ -96,137 +86,78 @@ export function convertMenusToRoutes(menuList) {
         route.redirect = '/404'
       }
     } else {
+      // 默认重定向到404
       route.redirect = '/404'
     }
 
-    // 递归处理子菜单
-    if (menu.children_list?.length) {
-      const childRoutes = convertMenusToRoutes(menu.children_list)
-      
-      if (menu.menu_path === 'no') {
-        route.children = childRoutes
-        
-        // 设置重定向到第一个有效子路由
-        if (childRoutes.length > 0 && childRoutes[0].path) {
-          route.redirect = childRoutes[0].path
-        }
-      } else {
-        route.children = childRoutes
-      }
+    if (hasChildren) {
+      route.children = menu.children_list.map(convert).filter(Boolean);
     }
-    
-    routes.push(route)
-  })
 
-  return routes
+    return route;
+  };
+
+  return menuList.map(convert).filter(Boolean);
 }
 
-/**
- * 添加动态路由
- * @param {Array} dynamicRoutes 动态路由配置
- */
-export function addDynamicRoutes(dynamicRoutes) {
-  // 先移除之前添加的动态路由
-  removeDynamicRoutes()
-  
-  // 创建布局路由
-  const layoutRoute = {
-    path: '/',
-    component: () => import('@/views/layout/index.vue'),
-    meta: { requiresAuth: true },
-    children: []
+export async function setupDynamicRoutes(menuList) {
+  if (!Array.isArray(menuList)) {
+    console.warn('setupDynamicRoutes: menuList 不是数组：', menuList);
+    return;
   }
-  
-  // 添加布局路由
-  router.addRoute(layoutRoute)
-  
-  // 添加子路由
-  dynamicRoutes.forEach(route => {
-    router.addRoute('layoutRoute', route)
-  })
-  
-  isDynamicRoutesAdded = true
-  console.log('动态路由添加完成')
+  const routes = transformMenuToRoutes(menuList);
+  console.log('处理之后的route',routes)
+  routes.forEach(route => {
+    router.addRoute('Layout', route);
+  });
 }
 
-/**
- * 移除所有动态路由
- */
-export function removeDynamicRoutes() {
-  // 移除布局路由及其所有子路由
-  if (router.hasRoute('layoutRoute')) {
-    router.removeRoute('layoutRoute')
-  }
-  
-  isDynamicRoutesAdded = false
-  console.log('已移除所有动态路由')
-}
-
-/**
- * 初始化动态路由
- */
 export async function initDynamicRoutes() {
   try {
-    // 从localStorage获取菜单数据
-    const menuData = localStorage.getItem('menuData')
+    const menuData = localStorage.getItem('menuData');
     if (!menuData) {
-      console.warn('菜单数据不存在')
-      return false
+      console.warn('菜单数据不存在');
+      return false;
     }
-    
-    const parsedData = JSON.parse(menuData)
-    console.log('解析后的菜单数据:', parsedData)
-    
-    // 处理可能的list嵌套
-    const menuList = Array.isArray(parsedData) ? parsedData : (parsedData.list || [])
-    
-    const dynamicRoutes = convertMenusToRoutes(menuList)
-    console.log('转换后的动态路由:', dynamicRoutes)
-    
-    addDynamicRoutes(dynamicRoutes)
-    return true
+
+    const parsedData = JSON.parse(menuData);
+    const menuList = Array.isArray(parsedData) ? parsedData : (parsedData.list || []);
+
+    if (!Array.isArray(menuList)) {
+      console.warn('菜单数据格式不正确');
+      return false;
+    }
+
+    await setupDynamicRoutes(menuList);
+    return true;
   } catch (e) {
-    console.error('菜单数据解析失败:', e)
-    return false
+    console.error('菜单数据解析失败:', e);
+    return false;
   }
 }
 
-// 全局路由守卫
+let isDynamicRouteAdded = false;
 router.beforeEach(async (to, from, next) => {
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const isAuthenticated = checkLoginStatus()
-  
-  // 不需要认证的页面直接放行
-  if (!requiresAuth) {
-    next()
-    return
+  console.log('触发路由守卫')
+  const token = localStorage.getItem('token');
+
+  if (!token && to.path !== '/login') {
+    return next('/login');
   }
-  
-  // 需要认证但未登录
-  if (!isAuthenticated) {
-    next('/login')
-    return
-  }
-  
-  // 已登录但动态路由未加载
-  if (!isDynamicRoutesAdded) {
+
+  if (token && !isDynamicRouteAdded) {
     try {
-      const success = await initDynamicRoutes()
-      if (success) {
-        // 动态路由添加完成后重定向到目标页面
-        next(to.fullPath)
-      } else {
-        next('/login')
-      }
-      return
+      const res = await _http.getMenuList();
+      const menuList = res?.list || [];
+      await setupDynamicRoutes(menuList);
+      isDynamicRouteAdded = true;
+      return next({ ...to, replace: true });
     } catch (e) {
-      console.error('路由初始化失败', e)
-      next('/login')
-      return
+      console.error('获取菜单失败：', e);
     }
   }
-  
-  next()
-})
 
-export default router
+  next();
+});
+
+export default router;

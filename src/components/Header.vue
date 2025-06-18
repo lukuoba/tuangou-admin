@@ -69,7 +69,6 @@ const handleLogout = () => {
   background-color: #fff;
   height: 61px;
   border-bottom: 1px solid #ccc;
-  width: calc(100% - 220px);
   top: 0;
   left: 220px; /* 靠左侧侧边栏向右侧布局 */
   right: 0;
