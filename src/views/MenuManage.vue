@@ -143,7 +143,7 @@ const handleAddAccount = async (formData) => {
   try {
     const isEdit = !!formData.id;
     const response = isEdit
-      ? await _http.editCounts(formData)
+      ? await _http.editMenu(formData)
       : await _http.addMune(formData);
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");

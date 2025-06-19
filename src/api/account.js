@@ -36,9 +36,8 @@ export default {
   // 删除账号
   deleteCounts(id) {
     return request({
-      url: `/api/sys/user/deleteUser`,  // 接口路径
+      url: `/api/sys/user/deleteUser?ids=${[id]}`,  // 接口路径
       method: 'delete',    // 请求方式
-      data:{ids:id}
     })
   }, 
   // 查询账号

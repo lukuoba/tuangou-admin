@@ -1,10 +1,5 @@
 <template>
   <div>
-    <p class="add-button">
-      <el-button type="primary" @click="openAddAccountDialog"
-        >新增账号</el-button
-      >
-    </p>
     <AddAccountDialog
       ref="addAccountDialog"
       @addaccount="handleAddAccount"
@@ -12,7 +7,7 @@
       :editId="dialogId"
       :editData="dialogData"
     />
-    <div>
+    <div class="top-action">
       <el-form
         :inline="true"
         :model="searchForm"
@@ -25,136 +20,110 @@
           <el-input v-model="searchForm.user_name" />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.user_status" placeholder="请选择状态" >
+          <el-select v-model="searchForm.user_status" placeholder="请选择状态">
             <el-option label="全部" :value="-1" />
             <el-option label="启用" :value="1" />
             <el-option label="禁用" :value="0" />
           </el-select>
         </el-form-item>
-        <el-form-item
-          ><el-button type="primary" native-type="submit"
-            >搜索</el-button
-          ></el-form-item
-        >
+        <el-form-item>
+          <el-button type="primary" native-type="submit">搜索</el-button>
+        </el-form-item>
       </el-form>
-
-      <SmartTable
-        ref="smartTableRef"
-        :fetch-data="fetchUserList"
-        :request-params="searchParams"
-        :columns="columns"
-      >
-      </SmartTable>
+      <p class="add-button">
+        <el-button type="primary" @click="openAddAccountDialog"
+          >新增账号</el-button
+        >
+      </p>
     </div>
+    <SmartTable
+      ref="smartTableRef"
+      :tableData="accountsData"
+      :total="totalAccounts"
+      :loading="isLoading"
+      :requestParams="searchParams"
+      @pagination-change="handlePaginationChange"
+    >
+      <template #table-column>
+        <el-table-column label="用户名" prop="user_name" />
+        <el-table-column label="手机号" prop="phone" />
+        <!-- <el-table-column label="角色">
+            <template #default="scope">
+              <el-tag :type="getTagType(scope.row.role)">
+                {{ getTagLabel(scope.row.role) }}
+              </el-tag>
+            </template>
+          </el-table-column> -->
+        <el-table-column label="状态">
+          <template #default="scope">
+            <el-tag :type="getTagStatus(scope.row.user_status)">
+              {{ getTagStatusLabel(scope.row.user_status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" prop="created_at" />
+        <el-table-column label="更新时间" prop="updated_at" />
+        <el-table-column label="操作">
+          <template #default="scope">
+            <el-button type="text" @click="handleEdit(scope.row)"
+              >编辑</el-button
+            >
+            <el-button type="text" @click="handleDelete(scope.row.id)"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </template>
+    </SmartTable>
   </div>
 </template>
 
-<script setup lang="jsx">
-import { ref, reactive, onMounted, nextTick } from "vue";
+<script setup>
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { formatDateVNode } from "@/utils/dateUtil";
 import AddAccountDialog from "../components/accounts/AddAccountDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
 import _http from "../api/account";
+
 const addAccountDialog = ref(null);
 const dialogTitle = ref("");
 const dialogId = ref("");
 const dialogData = ref({});
 const searchForm = reactive({
-  user_status: -1, 
-  phone: "", // 手机号码
-  user_name:"",//用户名
+  user_status: -1,
+  phone: "",
+  user_name: "",
 });
 const smartTableRef = ref(null);
-// 账户列表title
-const columns = ref([
-  { label: "用户名", prop: "username" },
-  { label: "手机号", prop: "phone" },
-  {
-    label: "角色",
-    prop: "role",
-    render: (row) => {
-      const tagType = getTagType(row.role);
-      // 只有有类型时才设置 type
-      return tagType ? (
-        <el-tag type={tagType}>{getTagLabel(row.role)}</el-tag>
-      ) : (
-        <span>{getTagLabel(row.role)}</span>
-      );
-    },
-  },
-  {
-    label: "状态",
-    prop: "status",
-    render: (row) => {
-      const tagType = getTagStatus(row.status);
-      return tagType ? (
-        <el-tag type={tagType}>{getTagStatusLabel(row.status)}</el-tag>
-      ) : (
-        <span>{getTagStatusLabel(row.status)}</span>
-      );
-    },
-  },
-  {
-    label: "创建时间",
-    prop: "createdAt",
-    render: (row) => formatDateVNode(row.createdAt, "YYYY-MM-DD HH:mm"),
-  },
-  {
-    label: "更新时间",
-    prop: "updatedAt",
-    render: (row) => formatDateVNode(row.updatedAt, "YYYY-MM-DD HH:mm"),
-  },
-  {
-    label: "操作",
-    prop: "operation",
-    render: (row) => {
-      return (
-        <div>
-          <el-button type="text" onClick={() => handleEdit(row)}>
-            编辑
-          </el-button>
-          <el-button type="text" onClick={() => handleDelete(row.id)}>
-            删除
-          </el-button>
-        </div>
-      );
-    },
-  },
-]);
+const accountsData = ref([]);
+const totalAccounts = ref(0);
+const isLoading = ref(false);
+const searchParams = ref({});
 
 // 打开新增账号弹窗
 const openAddAccountDialog = () => {
   dialogTitle.value = "新增账号";
   dialogId.value = null;
-  nextTick(() => {
-    addAccountDialog.value.openDialog();
-  });
+  addAccountDialog.value.openDialog();
 };
+
 // 打开编辑账号弹窗
 const handleEdit = (row) => {
   dialogTitle.value = "编辑账号";
   dialogId.value = row.id;
   dialogData.value = row;
-  console.log("shuju", row);
-  nextTick(() => {
-    addAccountDialog.value.openDialog();
-  });
+  addAccountDialog.value.openDialog();
 };
+
 // 处理新增/编辑账号逻辑
 const handleAddAccount = async (formData) => {
-  console.log(formData);
   try {
     const isEdit = !!formData.id;
-    const response = isEdit
-      ? await _http.editCounts(formData)
-      : await _http.addCounts(formData);
+    await (isEdit ? _http.editCounts(formData) : _http.addCounts(formData));
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
-
-    // 方法1：直接调用子组件的refresh方法（推荐）
-    smartTableRef.value.refresh();
-    // 添加成功后刷新账户列表
+    fetchUserList();
   } catch (error) {
     ElMessage.error(error.message || "操作失败");
   }
@@ -207,27 +176,30 @@ const getTagStatusLabel = (status) => {
   return statusMap[status] || "未知状态";
 };
 
-const searchParams = ref({});
 // 初始化时触发请求
 onMounted(() => {
-  // 初始化搜索参数（如果需要）
   searchParams.value = { ...searchForm };
   fetchUserList();
 });
+
 // 请求方法（由父组件实现）
-const fetchUserList = async (params) => {
-  // 实际项目中这里调用API
-  const res = await _http.getUserList(params);
-  console.log("用户列表数据", res);
-  return {
-    list: res.data,
-    total: res.total,
-  };
+const fetchUserList = async () => {
+  isLoading.value = true;
+  try {
+    const res = await _http.getUserList(searchParams.value);
+    accountsData.value = res.list;
+    totalAccounts.value = res.total;
+  } catch (error) {
+    console.error("获取用户列表失败:", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // 搜索触发
 const handleSearch = () => {
   searchParams.value = { ...searchForm };
+  fetchUserList();
 };
 
 // 删除账号
@@ -236,21 +208,26 @@ const handleDelete = async (id) => {
     await ElMessageBox.confirm("确定删除该用户吗？", "提示", {
       type: "warning",
     });
-    const res = await _http.deleteCounts(id);
-    console.log("删除成功", res);
+    await _http.deleteCounts(id);
     ElMessage.success("删除成功");
-    smartTableRef.value.refresh();
+    fetchUserList();
   } catch (error) {
     if (error !== "cancel") {
       ElMessage.error(error.message || "删除失败");
     }
   }
 };
+
+// 分页变化处理
+const handlePaginationChange = (params) => {
+  searchParams.value = { ...searchParams.value, ...params };
+  fetchUserList();
+};
 </script>
+
 <style scoped>
-.add-button {
+.top-action{
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
+  justify-content: space-between;
 }
 </style>

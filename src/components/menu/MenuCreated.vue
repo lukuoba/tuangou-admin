@@ -41,6 +41,12 @@
           <el-option label="禁用" :value="0" />
         </el-select>
       </el-form-item>
+      <el-form-item label="是否隐藏菜单" prop="is_hide_menu">
+        <el-select v-model="form.is_hide_menu" placeholder="请选择状态">
+          <el-option label="显示" :value="0" />
+          <el-option label="隐藏" :value="1" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="form.remark" placeholder="请输入备注" />
       </el-form-item>
@@ -84,6 +90,8 @@ const form = ref({
   parent_id: 0, // 0父级
   menu_status: 1, // 默认状态
   menu_type: 1, // 0->父级；1->子菜单
+  is_hide_menu: 0, // 是否隐藏菜单
+  remark:''
 });
 
 // 表单校验规则
@@ -96,6 +104,7 @@ const rules = {
   sort_no: [{ required: true, message: "请输入路由", trigger: "blur" }],
   parent_id: [{ required: true, message: "请选择父级菜单", trigger: "blur" }],
   menu_status: [{ required: true, message: "请选择状态", trigger: "blur" }],
+  is_hide_menu: [{ required: true, message: "请选择是否隐藏菜单", trigger: "blur" }],
 };
 
 // 表单引用
@@ -130,6 +139,8 @@ const openDialog = () => {
       parent_id: 0, // 0父级
       menu_status: 1, // 默认状态
       menu_type: 1, // 0->父级；1->子菜单
+      is_hide_menu:0,
+      remark:''
     };
   }
 };

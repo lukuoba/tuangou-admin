@@ -8,7 +8,7 @@
       <!-- 根据 hideMenu 控制顶部栏显示 -->
       <HeaderTop v-if="!hideMenu" />
       
-      <router-view  style="margin: 20px;"/>
+      <router-view class="main-center-box"/>
     </div>
   </div>
 </template>
@@ -37,5 +37,12 @@ const hideMenu = computed(() => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+.main-center-box {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  padding:16px
 }
 </style>

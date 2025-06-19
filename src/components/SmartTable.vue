@@ -1,12 +1,5 @@
 <template>
   <div class="smart-table-container">
-    <!-- 标题区域（支持插槽） -->
-    <div class="table-header">
-      <slot name="title">
-        <h3 v-if="title">{{ title }}</h3>
-      </slot>
-    </div>
-
     <!-- Table 主体 -->
     <el-table
       :data="tableData"
@@ -14,18 +7,8 @@
       v-loading="loading"
       style="width: 100%"
     >
-      <el-table-column
-        v-for="col in columns"
-        :key="col.prop"
-        :label="col.label"
-        :prop="col.prop"
-      >
-        <template #default="{ row }">
-          <!-- 处理自定义渲染 -->
-          <component v-if="col.render" :is="col.render(row)" />
-          <span v-else>{{ row[col.prop] }}</span>
-        </template>
-      </el-table-column>  
+      <!-- 接收父组件传入的 table-column -->
+      <slot name="table-column"></slot>
       <slot></slot>
     </el-table>
 
@@ -49,78 +32,49 @@
 import { ref, watch } from "vue";
 
 const props = defineProps({
-  title: String,
-  fetchData: { type: Function, required: true },  // 明确为Function类型
-  columns: { type: Array, required: true },
+  tableData: { type: Array, required: true }, // 由父组件传入表格数据
+  total: { type: Number, required: true }, // 由父组件传入总数据量
+  loading: { type: Boolean, required: true }, // 由父组件传入加载状态
   requestParams: { type: Object, default: () => ({}) },
 });
 
-const emit = defineEmits(["fetch-success", "fetch-error"]);
+const emit = defineEmits(["pagination-change"]);
 
-// 数据状态
-const tableData = ref([]);
-const loading = ref(false);
-const total = ref(0);
+// 分页状态
 const pagination = ref({
   page_num: 1,
   page_size: 10,
 });
 
-// 执行请求方法（添加async/await）
-const executeFetch = async () => {
-  try {
-    loading.value = true;
-    const params = {
-      ...props.requestParams,
-      page_num: pagination.value.page_num,
-      page_size: pagination.value.page_size,
-    };
-
-    const res = await props.fetchData(params);
-    
-    // 确保数据正确赋值
-    tableData.value = res?.list || res?.data || [];
-    total.value = res?.total || 0;
-
-    emit("fetch-success", res);
-  } catch (error) {
-    console.error("表格数据请求失败:", error);
-    tableData.value = []; // 清空数据
-    total.value = 0;
-    emit("fetch-error", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// 监听变化
+// 监听请求参数变化
 watch(
-  () => [props.requestParams, props.fetchData], // 同时监听fetchData和requestParams
+  () => props.requestParams,
   () => {
     pagination.value.page_num = 1; // 重置页码
-    executeFetch();
   },
-  { deep: true, immediate: true }
+  { deep: true }
 );
 
 // 分页变化处理
 const handlePaginationChange = () => {
-  executeFetch();
+  emit("pagination-change", {
+    page_num: pagination.value.page_num,
+    page_size: pagination.value.page_size,
+  });
 };
 
 // 暴露方法
 defineExpose({
-  refresh: executeFetch,
-  getTableData: () => tableData.value, // 可选：暴露获取当前数据的方法
+  getPagination: () => pagination.value, // 可选：暴露获取当前分页信息的方法
 });
 </script>
 
 <style scoped>
 .smart-table-container {
   padding: 20px;
-  background: #fff;
+  /* background: #fff;
   border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); */
 }
 
 .table-header {

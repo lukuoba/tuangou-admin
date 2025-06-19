@@ -14,7 +14,7 @@
     >
       <template v-for="item in filteredMenuList" :key="item.id">
         <!-- 有子菜单的项 -->
-        <el-sub-menu 
+        <el-sub-menu
           v-if="item.children_list && item.children_list.length"
           :index="item.menu_path"
         >
@@ -37,10 +37,7 @@
         </el-sub-menu>
 
         <!-- 没有子菜单的项 -->
-        <el-menu-item 
-          v-else 
-          :index="item.menu_path"
-        >
+        <el-menu-item v-else :index="item.menu_path">
           <el-icon>
             <component :is="iconMap[item.menu_icon]" />
           </el-icon>
@@ -55,26 +52,37 @@
 import { useRoute } from "vue-router";
 import { ref, computed } from "vue";
 import {
-  Star, Avatar, Tickets, Document, User
-} from '@element-plus/icons-vue';
+  Star,
+  Avatar,
+  Tickets,
+  Document,
+  User,
+  Setting,
+  VideoCamera,
+} from "@element-plus/icons-vue";
 
 const route = useRoute();
 const menuList = ref([]);
 
 // 图标映射
 const iconMap = {
-  'Start': Star,
-  'Share': Avatar,
-  'Tickets': Tickets,
-  'Document': Document,
-  'User': User,
-}
+  Start: Star,
+  Share: Avatar,
+  Tickets: Tickets,
+  Document: Document,
+  User: User,
+  Setting: Setting,
+  VideoCamera: VideoCamera,
+};
 
 // 过滤隐藏的菜单项
 const filteredMenuList = computed(() => {
-  return menuList.value.filter(item => 
-    item.is_hide_menu === 0 && 
-    (item.children_list ? item.children_list.some(child => child.is_hide_menu === 0) : true)
+  return menuList.value.filter(
+    (item) =>
+      item.is_hide_menu === 0 &&
+      (item.children_list
+        ? item.children_list.some((child) => child.is_hide_menu === 0)
+        : true)
   );
 });
 
@@ -115,7 +123,7 @@ loadMenuData();
   background-color: #002140;
 }
 .title {
-  color: #fff;                                                                     
+  color: #fff;
   font-size: 18px;
   font-weight: 600;
   margin: 0;
