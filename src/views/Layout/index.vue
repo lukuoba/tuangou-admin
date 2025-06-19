@@ -38,11 +38,17 @@ const hideMenu = computed(() => {
   flex-direction: column;
   overflow: hidden;
 }
+.router-view-container {
+  height: calc(100vh - 130px); /* 设置固定高度 */
+  overflow: auto; /* 内容超出时显示滚动条 */
+}
 .main-center-box {
   background: #fff;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   margin: 20px;
-  padding:16px
+  padding:16px;
+  height: 100%;
+  overflow: auto;
 }
 </style>
