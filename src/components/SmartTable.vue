@@ -2,10 +2,9 @@
   <div class="smart-table-container">
     <!-- 操作按钮区域 -->
     <div v-if="hasSelectionColumn" class="table-header">
-      <div></div>
       <div>
-        <el-button @click="clearSelection">清除选择</el-button>
-        <el-button type="danger" @click="handleBatchDelete">批量删除</el-button>
+        <el-button size="small" @click="clearSelection">清除选择</el-button>
+        <el-button size="small" type="danger" @click="handleBatchDelete">批量删除</el-button>
       </div>
     </div>
 
@@ -56,8 +55,9 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
+import { ElMessage } from "element-plus";
 
 const props = defineProps({
   tableData: { type: Array, required: true }, // 由父组件传入表格数据
@@ -65,7 +65,7 @@ const props = defineProps({
   loading: { type: Boolean, required: true }, // 由父组件传入加载状态
   requestParams: { type: Object, default: () => ({}) },
   hasSelectionColumn: { type: Boolean, default: false }, // 父组件配置是否有选择框列
-  deleteApiPath: { type: String, default: "" }, // 父组件传入删除接口路径
+  deleteApiPath: { type: Function, default: () => {} }, // 父组件传入删除接口路径
 });
 
 const emit = defineEmits(["pagination-change", "refresh-list"]);
@@ -106,7 +106,7 @@ const clearSelection = () => {
 
 // 点击批量删除按钮
 const handleBatchDelete = () => {
-  const selection = tableRef.value?.getSelection();
+  const selection = tableRef.value?.getSelectionRows();
   if (selection && selection.length > 0) {
     deleteDialogVisible.value = true;
   } else {
@@ -116,12 +116,16 @@ const handleBatchDelete = () => {
 
 // 确认批量删除
 const confirmBatchDelete = async () => {
-  const selection = tableRef.value?.getSelection();
+  const selection = tableRef.value?.getSelectionRows();
+  console.log('selection',selection)
   const ids = selection.map((item) => item.id);
+  console.log('ids',ids)
   try {
-    // 模拟调用删除接口
+    // 模拟调用删除接口 
     // 实际使用时需要替换为真实的接口调用
-    // await axios.delete(props.deleteApiPath, { data: { ids } });
+    const res = await props.deleteApiPath(
+      ids,
+    );
     ElMessage.success("删除成功");
     deleteDialogVisible.value = false;
     emit("refresh-list"); // 触发刷新列表事件
@@ -143,7 +147,7 @@ defineExpose({
 }
 
 .table-header {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;

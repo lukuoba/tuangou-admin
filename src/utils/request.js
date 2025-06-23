@@ -37,7 +37,6 @@ request.interceptors.response.use(
     if (response.data?.code === 200) {
       return response.data.data // 直接返回业务数据
     }
-    
     // 处理业务异常 (如 code !== 200)
     handleBusinessError(response.data)
     return Promise.reject(response.data)

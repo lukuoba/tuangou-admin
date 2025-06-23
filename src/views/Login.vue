@@ -82,8 +82,8 @@ import { initDynamicRoutes } from "@/router";
 import { ElMessage } from "element-plus";
 // 账号登录表单
 const accountForm = ref({
-  account: "",
-  password: "",
+  account: "18888888888",
+  password: "123456",
 });
 const loading = ref(false);
 // 验证码登录表单
