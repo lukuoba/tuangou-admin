@@ -1,7 +1,7 @@
 <template>
     <div>
       <p class="add-button">
-        <el-button type="primary" @click="openAddAccountDialog">新增账号</el-button>
+        <el-button type="primary" @click="openAddRoleDialog">新增角色</el-button>
       </p>
       <AddAccountDialog
         ref="addAccountDialog"
@@ -16,15 +16,19 @@
           :model="searchForm"
           @submit.prevent="handleSearch"
         >
-          <el-form-item label="手机号码">
-            <el-input v-model="searchForm.phone" />
+          <el-form-item label="角色名称">
+            <el-input v-model="searchForm.role_name" />
           </el-form-item>
-          <el-form-item label="用户名称">
-            <el-input v-model="searchForm.user_name" />
+          <el-form-item label="数据权限">
+            <el-select v-model="searchForm.data_scope" placeholder="请选择状态" class="search-input">
+              <el-option label="全部" :value="1" />
+              <el-option label="自定义" :value="0" />
+              <el-option label="仅本店铺" :value="2" />
+              <el-option label="仅本人" :value="3" />
+            </el-select>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select v-model="searchForm.user_status" placeholder="请选择状态">
-              <el-option label="全部" :value="-1" />
+            <el-select v-model="searchForm.role_status" placeholder="请选择状态" class="search-input">
               <el-option label="启用" :value="1" />
               <el-option label="禁用" :value="0" />
             </el-select>
@@ -44,24 +48,24 @@
           @pagination-change="handlePaginationChange"
         >
           <template #table-column>
-            <el-table-column label="用户名" prop="user_name" />
-            <el-table-column label="手机号" prop="phone" />
-            <!-- <el-table-column label="角色">
-              <template #default="scope">
-                <el-tag :type="getTagType(scope.row.role)">
-                  {{ getTagLabel(scope.row.role) }}
-                </el-tag>
-              </template>
-            </el-table-column> -->
+            <el-table-column label="角色名称" prop="role_name" />
+            <el-table-column label="角色标识" prop="role_key" />
             <el-table-column label="状态">
               <template #default="scope">
-                <el-tag :type="getTagStatus(scope.row.user_status)">
-                  {{ getTagStatusLabel(scope.row.user_status  ) }}
+                <el-tag :type="scope.row.role_status===1?'success':'danger'">
+                  {{ scope.row.role_status===1?'启用':'禁用'  }}
                 </el-tag>
               </template>
             </el-table-column>
+            <el-table-column label="数据权限">
+              <template #default="scope">
+                  {{ getText(scope.row.data_scope) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="创建者" prop="created_by" />
             <el-table-column label="创建时间" prop="created_at" />
             <el-table-column label="更新时间" prop="updated_at" />
+            <el-table-column label="备注" prop="remark" />
             <el-table-column label="操作">
               <template #default="scope">
                 <el-button type="text" @click="handleEdit(scope.row)">编辑</el-button>
@@ -77,19 +81,18 @@
   <script setup>
   import { ref, reactive, onMounted } from "vue";
   import { ElMessage, ElMessageBox } from "element-plus";
-  import { formatDateVNode } from "@/utils/dateUtil";
-  import AddAccountDialog from "../components/accounts/AddAccountDialog.vue";
+  import AddAccountDialog from "@/components/accounts/AddAccountDialog.vue";
   import SmartTable from "@/components/SmartTable.vue";
-  import _http from "../api/account";
+  import _http from "@/api/admin";
   
   const addAccountDialog = ref(null);
   const dialogTitle = ref("");
   const dialogId = ref("");
   const dialogData = ref({});
   const searchForm = reactive({
-    user_status: -1, 
-    phone: "", 
-    user_name: "",
+    role_name: '', 
+    data_scope: 1, 
+    role_status: 1,
   });
   const smartTableRef = ref(null);
   const accountsData = ref([]);
@@ -98,15 +101,15 @@
   const searchParams = ref({});
   
   // 打开新增账号弹窗
-  const openAddAccountDialog = () => {
-    dialogTitle.value = "新增账号";
+  const openAddRoleDialog = () => {
+    dialogTitle.value = "新增角色";
     dialogId.value = null;
     addAccountDialog.value.openDialog();
   };
   
   // 打开编辑账号弹窗
   const handleEdit = (row) => {
-    dialogTitle.value = "编辑账号";
+    dialogTitle.value = "编辑角色";
     dialogId.value = row.id;
     dialogData.value = row;
     addAccountDialog.value.openDialog();
@@ -135,16 +138,16 @@
     return roleMap[role] || "未知角色";
   };
   
-  const getTagType = (role) => {
+  const getText = (role) => {
     switch (role) {
-      case "admin":
-        return "success";
-      case "common":
-        return "info";
-      case "vip":
-        return "warning";
-      case "special":
-        return "danger";
+      case 0:
+        return "自定义";
+      case 1:
+        return "全部";
+      case 2:
+        return "仅本店铺";
+      case 3:
+        return "仅本人";
       default:
         return "";
     }
@@ -173,7 +176,7 @@
   };
   
   // 初始化时触发请求
-  onMounted(() => {
+  onMounted(() => { 
     searchParams.value = { ...searchForm };
     fetchUserList();
   });
@@ -182,7 +185,7 @@
   const fetchUserList = async () => {
     isLoading.value = true;
     try {
-      const res = await _http.getUserList(searchParams.value);
+      const res = await _http.getRoleList(searchParams.value);
       accountsData.value = res.list;
       totalAccounts.value = res.total;
     } catch (error) {
@@ -227,4 +230,7 @@
     justify-content: flex-end;
     margin-bottom: 20px;
   }
+  .search-input {
+  width: 192px;
+}
   </style>

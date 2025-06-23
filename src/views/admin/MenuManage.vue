@@ -77,9 +77,9 @@
 <script setup>
 import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import MenuManage from "../components/menu/MenuCreated.vue";
+import MenuManage from "@/components/menu/MenuCreated.vue";
 import TreeTable from "@/components/TreeTable.vue";
-import _http from "../api/admin";
+import _http from "@/api/admin";
 const addAccountDialog = ref(null);
 const dialogTitle = ref("");
 const dialogId = ref("");

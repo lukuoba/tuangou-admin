@@ -33,6 +33,13 @@ export default {
       method: 'delete',    
     })
   },
+
+  /**
+   * 日志管理
+   * @param {*} params 
+   * @returns 
+   */
+  
   // 查询登录日志列表
   getLoginLogList(params) {
     return request({
@@ -85,4 +92,52 @@ export default {
       params:{ids:id}
     })
   },
+
+  /***
+   * 角色管理
+   * @param {*} params 
+   * @returns 
+   */
+  // 添加角色
+  addRole(data) {
+    return request({
+      url: '/api/sys/role/addRole', 
+      method: 'post',    
+      data      // 请求参数
+    })
+  },
+  // 查询角色列表
+  getRoleList(params) {
+    return request({
+      url: '/api/sys/role/selectRoleList', 
+      method: 'get',    
+      params      // 请求参数
+    })
+  },
+  // 删除角色
+  deleteRole(id) {
+    return request({
+      url: `/api/sys/role/deleteRole`, 
+      method: 'delete',    
+      params:{ids:id}
+    })
+  },
+  // 编辑角色
+  editRole(data) {
+    return request({
+      url: '/api/sys/role/updateRole', 
+      method: 'put',    
+      data      // 请求参数
+    })
+  },
+  // 查询角色详情
+  detailRole(id) {
+    return request({
+      url: `/api/sys/role/selectRoleInfo`, 
+      method: 'get',    
+      params: {
+        id
+      }
+    })
+  }
 }

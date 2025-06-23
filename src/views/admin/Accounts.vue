@@ -81,10 +81,9 @@
 <script setup>
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { formatDateVNode } from "@/utils/dateUtil";
-import AddAccountDialog from "../components/accounts/AddAccountDialog.vue";
+import AddAccountDialog from "@/components/accounts/AddAccountDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
-import _http from "../api/account";
+import _http from "@/api/account";
 
 const addAccountDialog = ref(null);
 const dialogTitle = ref("");
@@ -226,7 +225,7 @@ const handlePaginationChange = (params) => {
 </script>
 
 <style scoped>
-.top-action{
+.top-action {
   display: flex;
   justify-content: space-between;
 }
