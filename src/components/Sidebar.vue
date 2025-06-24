@@ -59,6 +59,7 @@ import {
   User,
   Setting,
   VideoCamera,
+  Link,
 } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -73,6 +74,7 @@ const iconMap = {
   User: User,
   Setting: Setting,
   VideoCamera: VideoCamera,
+  Link: Link,
 };
 
 // 过滤隐藏的菜单项
