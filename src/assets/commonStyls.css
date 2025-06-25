@@ -17,3 +17,9 @@ html,
 #app {
   height: 100%;
 }
+.search-input{
+  width: 100%;
+}
+.search-input .el-select{
+  width: 100%;
+}

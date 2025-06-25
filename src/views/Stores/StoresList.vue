@@ -46,7 +46,7 @@ import { formatDateVNode } from "@/utils/dateUtil";
 import AddOrEditStrores from "@/components/stores/AddOrEditStrores.vue";
 import SmartTable from "@/components/SmartTable.vue";
 import { getFullRegionName } from "@/utils/regionUtil.js";
-import _http from "../api/stores.js";
+import _http from "@/api/stores.js";
 const addEditDialog = ref(null);
 const dialogTitle = ref("");
 const dialogId = ref("");

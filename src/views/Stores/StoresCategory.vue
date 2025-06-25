@@ -1,28 +1,26 @@
 <template>
   <div>
     <p class="add-button">
-      <el-button type="primary" @click="openAddRouteDialog">新增接口</el-button>
+      <el-button type="primary" @click="openAddCategoryDialog"
+        >新增店类</el-button
+      >
     </p>
-    <AddRoleDialog
+    <AddCategoryDialog
       ref="addRoleDialog"
-      @addaccount="handleAdRoute"
+      @addaccount="handleAddRole"
       :title="dialogTitle"
       :editId="dialogId"
       :editData="dialogData"
     />
     <div>
-      <SmartTable
-        ref="smartTableRef"
-        title="角色列表"
-        :tableData="accountsData"
-        :total="totalAccounts"
-        :loading="isLoading"
-        :requestParams="searchParams"
-        @pagination-change="handlePaginationChange"
+
+      <TreeTable
+        :data="tableData"
+        :loading="loading"
+        :showSearch="false"
       >
         <template #table-column>
-          <el-table-column label="角色名称" prop="role_name" />
-          <el-table-column label="角色标识" prop="role_key" />
+          <el-table-column label="门店类型" prop="category_name" />
           <el-table-column label="状态">
             <template #default="scope">
               <el-tag
@@ -32,7 +30,7 @@
               </el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="数据权限">
+          <!-- <el-table-column label="数据权限">
             <template #default="scope">
               {{ getText(scope.row.data_scope) }}
             </template>
@@ -50,9 +48,9 @@
                 >删除</el-button
               >
             </template>
-          </el-table-column>
+          </el-table-column> -->
         </template>
-      </SmartTable>
+      </TreeTable>
     </div>
   </div>
 </template>
@@ -60,40 +58,40 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import AddRoleDialog from "@/components/accounts/AddRoleDialog.vue";
-import SmartTable from "@/components/SmartTable.vue";
-import _http from "@/api/admin";
+import AddCategoryDialog from "@/components/stores/AddCategoryDialog.vue";
+import TreeTable from "@/components/TreeTable.vue";
+import _http from "@/api/stores";
 
 const addRoleDialog = ref(null);
 const dialogTitle = ref("");
 const dialogId = ref("");
 const dialogData = ref({});
-const smartTableRef = ref(null);
-const accountsData = ref([]);
-const totalAccounts = ref(0);
-const isLoading = ref(false);
+const tableData = ref([]);
+const loading = ref(false);
 const searchParams = ref({});
 
 // 打开新增账号弹窗
-const openAddRouteDialog = () => {
-  dialogTitle.value = "新增接口";
+const openAddCategoryDialog = () => {
+  dialogTitle.value = "新增角色";
   dialogId.value = null;
   addRoleDialog.value.openDialog();
 };
 
 // 打开编辑账号弹窗
 const handleEdit = (row) => {
-  dialogTitle.value = "编辑接口";
+  dialogTitle.value = "编辑角色";
   dialogId.value = row.id;
   dialogData.value = row;
   addRoleDialog.value.openDialog();
 };
 
 // 处理新增/编辑账号逻辑
-const handleAdRoute = async (formData) => {
+const handleAddRole = async (formData) => {
   try {
     const isEdit = !!formData.id;
-    await (isEdit ? _http.editRoute(formData) : _http.addRoute(formData));
+    await (isEdit
+      ? _http.updateCategory(formData)
+      : _http.addCategory(formData));
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
     fetchUserList();
@@ -116,24 +114,20 @@ const getText = (role) => {
       return "";
   }
 };
-// 初始化时触发请求
-onMounted(() => {
-  fetchUserList();
-});
-
 // 请求方法（由父组件实现）
-const fetchUserList = async () => {
-  isLoading.value = true;
+const loadData = async () => {
+  loading.value = true;
   try {
-    const res = await _http.getRouteList();
-    accountsData.value = res.list;
-    totalAccounts.value = res.total;
+    const res = await _http.getCategoryList(searchParams.value);
+    console.log(res)
+    tableData.value = res.list;
   } catch (error) {
     console.error("获取用户列表失败:", error);
   } finally {
-    isLoading.value = false;
+    loading.value = false;
   }
 };
+
 
 // 删除账号
 const handleDelete = async (id) => {
@@ -156,6 +150,10 @@ const handlePaginationChange = (params) => {
   searchParams.value = { ...searchParams.value, ...params };
   fetchUserList();
 };
+// 初始化时触发请求
+onMounted(() => {
+  loadData();
+});
 </script>
 
 <style scoped>

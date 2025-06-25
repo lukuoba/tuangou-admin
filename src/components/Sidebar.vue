@@ -60,6 +60,9 @@ import {
   Setting,
   VideoCamera,
   Link,
+  Management,
+  OfficeBuilding,
+  Film
 } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -75,6 +78,9 @@ const iconMap = {
   Setting: Setting,
   VideoCamera: VideoCamera,
   Link: Link,
+  Management:Management,
+  OfficeBuilding:OfficeBuilding,
+  Film:Film
 };
 
 // 过滤隐藏的菜单项

@@ -30,11 +30,11 @@ export const staticRoutes = [
     component: () => import('@/views/404.vue'),
     meta: { requiresAuth: false },
   },
-  {
-    path: '/:pathMatch(.*)*',
-    name: 'CatchAll',
-    redirect: '/404',
-  },
+  // {
+  //   path: '/:pathMatch(.*)*',
+  //   name: 'CatchAll',
+  //   redirect: '/404',
+  // },
 ];
 
 
@@ -80,6 +80,7 @@ export function transformMenuToRoutes(menuList) {
         if (!componentPath.endsWith('.vue')) {
           componentPath += '.vue'
         }
+        console.log('尝试加载组件路径:', componentPath); 
         route.component = () => import(/* @vite-ignore */ componentPath)
       } catch (e) {
         console.error(`组件加载失败: ${menu.menu_component}`, e)
@@ -137,8 +138,9 @@ export async function initDynamicRoutes() {
 }
 
 let isDynamicRouteAdded = false;
+// ... 已有代码 ...
 router.beforeEach(async (to, from, next) => {
-  console.log('触发路由守卫')
+  console.log('22222触发路由守卫',isDynamicRouteAdded)
   const token = localStorage.getItem('token');
 
   if (!token && to.path !== '/login') {
@@ -147,17 +149,24 @@ router.beforeEach(async (to, from, next) => {
 
   if (token && !isDynamicRouteAdded) {
     try {
-      const res = await _http.getMenuList();
-      const menuList = res?.list || [];
-      await setupDynamicRoutes(menuList);
+      // 等待动态路由初始化完成
+      await initDynamicRoutes();
       isDynamicRouteAdded = true;
-      return next({ ...to, replace: true });
-    } catch (e) {
-      console.error('获取菜单失败：', e);
+
+      // 检查目标路由是否为 404
+      if (to.name === 'NotFound') {
+        // 尝试跳转到首页
+        return next({ path: '/', replace: true });
+      }
+      return next({ ...to, replace: true }); 
+    } catch (error) {
+      console.error('动态路由初始化失败:', error);
+      return next('/login');
     }
   }
 
   next();
 });
+// ... 已有代码 ...
 
 export default router;

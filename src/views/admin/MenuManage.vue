@@ -156,7 +156,6 @@ const handleAddAccount = async (formData) => {
   }
 };
 
-const searchParams = ref({});
 // 初始化时触发请求
 onMounted(() => {
   // 初始化搜索参数（如果需要）

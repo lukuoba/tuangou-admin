@@ -91,12 +91,12 @@
     // 是否显示搜索框
     showSearch: {
       type: Boolean,
-      default: true
+      default: false
     },
     // 是否显示默认操作列
     showDefaultActions: {
       type: Boolean,
-      default: true
+      default: false
     },
     // 是否显示编辑按钮
     showEditAction: {

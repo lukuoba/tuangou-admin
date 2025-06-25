@@ -12,6 +12,7 @@ const router = useRouter();
 
 // 初始化应用
 const initApp = async () => {
+  console.log(111)
   const isLoggedIn = checkLoginStatus();
 
   if (isLoggedIn) {
