@@ -79,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted,nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AddAccountDialog from "@/components/accounts/AddAccountDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
@@ -104,7 +104,9 @@ const searchParams = ref({});
 const openAddAccountDialog = () => {
   dialogTitle.value = "新增账号";
   dialogId.value = null;
-  addAccountDialog.value.openDialog();
+  nextTick(() => {
+    addAccountDialog.value.openDialog();
+  });
 };
 
 // 打开编辑账号弹窗
@@ -112,7 +114,9 @@ const handleEdit = (row) => {
   dialogTitle.value = "编辑账号";
   dialogId.value = row.id;
   dialogData.value = row;
-  addAccountDialog.value.openDialog();
+  nextTick(() => {
+    addAccountDialog.value.openDialog();
+  });
 };
 
 // 处理新增/编辑账号逻辑

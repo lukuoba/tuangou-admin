@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from "vue";
+import { ref, reactive, onMounted,nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AddRoleDialog from "@/components/accounts/AddRoleDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
@@ -118,7 +118,9 @@ const searchParams = ref({});
 const openAddRoleDialog = () => {
   dialogTitle.value = "新增角色";
   dialogId.value = null;
-  addRoleDialog.value.openDialog();
+  nextTick(() => {
+    addCategoryDialog.value.openDialog();
+  });
 };
 
 // 打开编辑账号弹窗
@@ -126,7 +128,9 @@ const handleEdit = (row) => {
   dialogTitle.value = "编辑角色";
   dialogId.value = row.id;
   dialogData.value = row;
-  addRoleDialog.value.openDialog();
+  nextTick(() => {
+    addAccountDialog.value.openDialog();
+  });
 };
 
 // 处理新增/编辑账号逻辑

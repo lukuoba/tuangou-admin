@@ -162,16 +162,6 @@ onMounted(() => {
   // searchParams.value = { ...searchForm };
   loadData();
 });
-// 请求方法（由父组件实现）
-const fetchUserList = async (params) => {
-  // 实际项目中这里调用API
-  const res = await _http.getMenuList(params);
-  console.log("res", res);
-  return {
-    list: res.list,
-    // total: res.total,
-  };
-};
 
 // 删除账号
 const handleDelete = async (id) => {

@@ -58,7 +58,7 @@ export default {
   // 上传配置
   uploadConfig(params) {
     return request({
-      url: '/api/storage/oss/preSignUrl',  // 接口路径
+      url: '/api/com/oss/generatePreSignUrl',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     }) 

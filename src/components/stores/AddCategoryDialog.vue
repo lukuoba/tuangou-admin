@@ -16,6 +16,7 @@
           class="search-input"
         >
           <el-option label="首级" :value="0" />
+          <el-option label="二级" :value="1" />
         </el-select>
       </el-form-item>
       <el-form-item label="父级ID" prop="parent_id">
@@ -24,7 +25,12 @@
           placeholder="请选择类别"
           class="search-input"
         >
-          <el-option label="首级" :value="0" />
+          <el-option
+            v-for="item in parentList"
+            :key="item.id"
+            :label="item.category_name"
+            :value="item.id"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="序列" prop="sort_no">
@@ -66,7 +72,7 @@
 <script setup>
 import PictureUpload from "@/components/PictureUpload.vue";
 import { ref } from "vue";
-
+import  _http from "@/api/stores";
 // 弹窗显示状态
 const dialogVisible = ref(false);
 
@@ -76,8 +82,8 @@ const { title, editId, editData } = defineProps({
     default: "新增账号",
   },
   editId: {
-    type: String,
-    default: "",
+    type: Number,
+    default: 0,
   },
   editData: {
     type: Object,
@@ -112,7 +118,7 @@ const rules = {
 
 // 表单引用
 const formRef = ref(null);
-
+const parentList = ref([]);
 // 定义 emit
 const emit = defineEmits(["addaccount"]);
 
@@ -120,6 +126,16 @@ const emit = defineEmits(["addaccount"]);
 const openDialog = () => {
   dialogVisible.value = true;
   console.log("id", editId, editData);
+  _http.getCategoryList().then((res) => {
+    if (res.list) {
+      parentList.value = res.list.map(item => ({
+        id: item.id,
+        category_name: item.category_name
+      }));;
+      parentList.value.push({ id: 0, category_name: '父级' });
+      console.log("parentId", parentList);
+    }
+  });
   if (editId) {
     form.value = { ...editData }; // 使用解构赋值创建新对象，避免引用问题
   } else {

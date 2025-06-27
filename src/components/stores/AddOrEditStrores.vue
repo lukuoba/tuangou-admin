@@ -74,8 +74,8 @@ const { title, editId, editData, modelValue } = defineProps({
     default: "新增账号",
   },
   editId: {
-    type: String,
-    default: "",
+    type: Number,
+    default: 0,
   },
   editData: {
     type: Object,

@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted,nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AddRoleDialog from "@/components/accounts/AddRoleDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
@@ -78,7 +78,9 @@ const searchParams = ref({});
 const openAddRouteDialog = () => {
   dialogTitle.value = "新增接口";
   dialogId.value = null;
-  addRoleDialog.value.openDialog();
+  nextTick(() => {
+    addAccountDialog.value.openDialog();
+  });
 };
 
 // 打开编辑账号弹窗
@@ -86,7 +88,9 @@ const handleEdit = (row) => {
   dialogTitle.value = "编辑接口";
   dialogId.value = row.id;
   dialogData.value = row;
-  addRoleDialog.value.openDialog();
+  nextTick(() => {
+    addAccountDialog.value.openDialog();
+  });
 };
 
 // 处理新增/编辑账号逻辑

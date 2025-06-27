@@ -47,7 +47,6 @@ const router = createRouter({
 // 转换菜单为动态路由
 export function transformMenuToRoutes(menuList) {
   if (!Array.isArray(menuList)) {
-    console.warn('菜单数据不是数组：', menuList);
     return [];
   }
 
@@ -80,7 +79,6 @@ export function transformMenuToRoutes(menuList) {
         if (!componentPath.endsWith('.vue')) {
           componentPath += '.vue'
         }
-        console.log('尝试加载组件路径:', componentPath); 
         route.component = () => import(/* @vite-ignore */ componentPath)
       } catch (e) {
         console.error(`组件加载失败: ${menu.menu_component}`, e)
@@ -103,11 +101,9 @@ export function transformMenuToRoutes(menuList) {
 
 export async function setupDynamicRoutes(menuList) {
   if (!Array.isArray(menuList)) {
-    console.warn('setupDynamicRoutes: menuList 不是数组：', menuList);
     return;
   }
   const routes = transformMenuToRoutes(menuList);
-  console.log('处理之后的route',routes)
   routes.forEach(route => {
     router.addRoute('Layout', route);
   });
@@ -117,7 +113,6 @@ export async function initDynamicRoutes() {
   try {
     const menuData = localStorage.getItem('menuData');
     if (!menuData) {
-      console.warn('菜单数据不存在');
       return false;
     }
 
@@ -125,7 +120,6 @@ export async function initDynamicRoutes() {
     const menuList = Array.isArray(parsedData) ? parsedData : (parsedData.list || []);
 
     if (!Array.isArray(menuList)) {
-      console.warn('菜单数据格式不正确');
       return false;
     }
 
@@ -140,7 +134,6 @@ export async function initDynamicRoutes() {
 let isDynamicRouteAdded = false;
 // ... 已有代码 ...
 router.beforeEach(async (to, from, next) => {
-  console.log('22222触发路由守卫',isDynamicRouteAdded)
   const token = localStorage.getItem('token');
 
   if (!token && to.path !== '/login') {
@@ -160,7 +153,6 @@ router.beforeEach(async (to, from, next) => {
       }
       return next({ ...to, replace: true }); 
     } catch (error) {
-      console.error('动态路由初始化失败:', error);
       return next('/login');
     }
   }
