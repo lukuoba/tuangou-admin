@@ -35,10 +35,10 @@
         <el-table-column label="备注" prop="remark" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button type="text" @click="handleEdit(scope.row)"
+            <el-button link type="primary"  @click="handleEdit(scope.row)"
               >编辑</el-button
             >
-            <el-button type="text" @click="handleDelete(scope.row.id)"
+            <el-button link type="primary" @click="handleDelete(scope.row.id)"
               >删除</el-button
             >
           </template>
@@ -57,7 +57,7 @@ import _http from "@/api/stores";
 
 const addCategoryDialog = ref(null);
 const dialogTitle = ref("");
-const dialogId = ref("");
+const dialogId = ref(null);
 const dialogData = ref({});
 const tableData = ref([]);
 const loading = ref(false);
@@ -67,7 +67,9 @@ const searchParams = ref({});
 const openAddCategoryDialog = () => {
   dialogTitle.value = "新增角色";
   dialogId.value = null;
-  addCategoryDialog.value.openDialog();
+  nextTick(() => {
+    addCategoryDialog.value.openDialog();
+  });
 };
 
 // 打开编辑账号弹窗

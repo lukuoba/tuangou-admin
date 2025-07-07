@@ -16,7 +16,7 @@
         <!-- 有子菜单的项 -->
         <el-sub-menu
           v-if="item.children_list && item.children_list.length"
-          :index="item.menu_path"
+          :index="item.id.toString()"
         >
           <template #title>
             <el-icon>
@@ -62,7 +62,7 @@ import {
   Link,
   Management,
   OfficeBuilding,
-  Film
+  Film,
 } from "@element-plus/icons-vue";
 
 const route = useRoute();
@@ -78,9 +78,9 @@ const iconMap = {
   Setting: Setting,
   VideoCamera: VideoCamera,
   Link: Link,
-  Management:Management,
-  OfficeBuilding:OfficeBuilding,
-  Film:Film
+  Management: Management,
+  OfficeBuilding: OfficeBuilding,
+  Film: Film,
 };
 
 // 过滤隐藏的菜单项
@@ -103,6 +103,7 @@ const loadMenuData = () => {
   if (menuData) {
     try {
       menuList.value = JSON.parse(menuData);
+      console.log("menuList", menuList.value);
     } catch (e) {
       console.error("菜单数据解析失败:", e);
     }

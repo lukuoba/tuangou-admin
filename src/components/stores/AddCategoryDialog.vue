@@ -52,7 +52,7 @@
       </el-form-item>
       <el-form-item label="类别照片">
         <PictureUpload
-          v-model="form.picture"
+          v-model="form.category_picture"
           :max-count="1"
           list-type="picture-card"
         />
@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import PictureUpload from "@/components/PictureUpload.vue";
+import PictureUpload from "@/components/PictureUploadNew.vue";
 import { ref } from "vue";
 import  _http from "@/api/stores";
 // 弹窗显示状态
@@ -99,6 +99,7 @@ const form = ref({
   category_level: 0, // 首级0
   sort_no: 1,
   category_status: 1,
+  category_picture: [],
 });
 
 // 表单校验规则
@@ -125,19 +126,24 @@ const emit = defineEmits(["addaccount"]);
 // 打开弹窗
 const openDialog = () => {
   dialogVisible.value = true;
-  console.log("id", editId, editData);
   _http.getCategoryList().then((res) => {
     if (res.list) {
       parentList.value = res.list.map(item => ({
         id: item.id,
         category_name: item.category_name
-      }));;
+      }));
       parentList.value.push({ id: 0, category_name: '父级' });
       console.log("parentId", parentList);
     }
   });
+
+  console.log({editData})
+
   if (editId) {
-    form.value = { ...editData }; // 使用解构赋值创建新对象，避免引用问题
+    form.value = {
+      ...editData, 
+      category_picture: editData.category_picture ? [editData.category_picture] :  []
+    }; // 使用解构赋值创建新对象，避免引用问题
   } else {
     form.value = {
       category_name: "",
@@ -146,6 +152,7 @@ const openDialog = () => {
       category_level: 0, // 首级0
       sort_no: 1,
       category_status: 1,
+      category_picture: [],
     };
   }
 };
@@ -161,7 +168,10 @@ const handleSubmit = () => {
   formRef.value.validate((valid) => {
     if (valid) {
       console.log("表单数据", form.value);
-      emit("addaccount", form.value); // 触发父组件的 addaccount 方法
+      emit("addaccount", {
+        ...form.value,
+        category_picture: form.value.category_picture[0],
+      }); // 触发父组件的 addaccount 方法
       handleClose(); // 关闭弹窗
     } else {
       console.log("表单校验失败");

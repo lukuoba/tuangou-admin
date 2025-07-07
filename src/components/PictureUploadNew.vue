@@ -42,12 +42,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, computed, watch } from "vue";
+import { v4 as uuidv4 } from 'uuid';
 import { Plus, ZoomIn, Delete } from "@element-plus/icons-vue";
 import { ElMessage, ElDialog } from "element-plus";
-import type { UploadProps, UploadFile } from "element-plus";
 import _http from "@/api/account";
 import axios from "axios";
+import type { UploadProps, UploadFile as OriginalUploadFile } from "element-plus";
+
+// 扩展 UploadFile 类型，添加 uid 属性
+interface UploadFile extends OriginalUploadFile {
+  uid: number;
+}
 
 interface Props {
   modelValue?: string[]; // 绑定值（返回的key数组）
@@ -64,41 +70,41 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
 });
 
-const emit = defineEmits(["update:modelValue"]);
+const modelValue = defineModel<string[]>("modelValue", {
+  type: Array as () => string[],
+  default: () => []
+});
+
+const fileList = ref<UploadFile[]>([])
+
+watch(() => modelValue.value, (value) => {
+ if (value) {
+  fileList.value = value.map((item) => ({
+    uid: uuidv4(),
+    name: item,
+    url: item,
+  })) as unknown as UploadFile[];
+ }
+}, {
+  immediate: true
+})
 
 // 允许的文件类型
 const acceptTypes = ["image/jpeg", "image/png", "image/jpg"];
-const fileList = ref<Array<UploadFile & {uid: string}>>([]);
 const dialogVisible = ref(false);
 const dialogImageUrl = ref("");
 const dialogImageTitle = ref("图片预览");
 
-// 初始化已上传文件
-watch(
-  () => props.modelValue,
-  (val) => {
-    console.log("上传成功后", val);
-    if (val && val.length > 0) {
-      // 清空现有的 fileList
-      fileList.value = [];
-      console.log("val", val);
-      fileList.value = val.map((url, index) => {
-        return {
-          uid: `init_${index}`,
-          name: url.split("/").pop() || `image_${index}`,
-          url,
-          status: "success",
-        }
-      }) as Array<UploadFile & {uid: string}>
-    } else {
-      fileList.value = [];
-    }
-  },
-  { immediate: true }
-);
+// 是否隐藏上传按钮
+const hideUploadButton = computed(() => {
+  return (
+    props.disabled ||
+    (props.maxCount > 0 && fileList.value.length >= props.maxCount)
+  );
+});
 
 // 上传前校验
-const beforeUpload: UploadProps["beforeUpload"] = (file) => {
+const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
   const isValidType = acceptTypes.includes(file.type);
   const isValidSize = file.size / 1024 / 1024 / 1024 <= 1; // 1GB限制
 
@@ -112,20 +118,20 @@ const beforeUpload: UploadProps["beforeUpload"] = (file) => {
     return false;
   }
 
-  return true;
+  // 手动添加唯一标识
+  (file as any).uid = uuidv4();
+
+  return true
 };
 
 // 自定义上传
 const handleUpload: UploadProps["httpRequest"] = async (options) => {
-  console.log("handleUpload 方法被调用，options:", options); // 添加日志
-
   try {
     // 1. 获取签名
     const data = await _http.uploadConfig({
       file_name: options.file.name,
-      // fileType: options.file.type,
     });
-    console.log("上传data", data, options);
+
     // 2. 上传到OSS
     await axios.post(data.pre_sign_url, options.file, {
       headers: {
@@ -134,59 +140,34 @@ const handleUpload: UploadProps["httpRequest"] = async (options) => {
       // 添加withCredentials支持
       withCredentials: false,
     });
-    console.log("fileList.valuefileList.value", fileList.value, options);
-    // const existingFile = fileList.value.filter((f) => f.status === 'success');
-    // console.log("existingFileexistingFile", existingFile);
-    // // 3. 更新文件列表
-    // if (!existingFile) {
-      // 3. 更新文件列表
-      // fileList.value.push({
-      //   uid: options.file.uid,
-      //   name: options.file.name,
-      //   url: data.access_url,
-      //   status: "success",
-      // });
-    // }
-    console.log("fileList.value", fileList.value);
-    // 4. 更新绑定值（返回key数组）
-    emit(
-      "update:modelValue",
-      [
-      data.pre_sign_url
-      ]
-    );
+
+    modelValue.value = [
+      data.access_url
+    ]
   } catch (error) {
     ElMessage.error("上传失败");
     console.error("上传错误:", error);
   }
 };
+
 // 预览图片
 const handlePreview = (file) => {
   dialogImageUrl.value = file.url;
   dialogVisible.value = true;
   dialogImageTitle.value = `预览 - ${file.name}`;
 };
-// 是否隐藏上传按钮
-const hideUploadButton = computed(() => {
-  return (
-    props.disabled ||
-    (props.maxCount > 0 && fileList.value.length >= props.maxCount)
-  );
-});
 
 // 文件移除处理
-const handleRemove: UploadProps["onRemove"] = (file) => {
-  fileList.value = fileList.value.filter((f) => f.uid !== file.uid);
-  emit(
-    "update:modelValue",
-    fileList.value.map((f) => f.url)
-  );
+const handleRemove = (file: UploadFile) => {
+  console.log({file})
+  fileList.value = fileList.value.filter((f: UploadFile) => f.uid !== file.uid);
 };
 
 // 超出限制提示
 const handleExceed: UploadProps["onExceed"] = () => {
   ElMessage.warning(`最多只能上传 ${props.maxCount} 张图片`);
 };
+
 </script>
 
 <style scoped>

@@ -16,7 +16,13 @@ export const staticRoutes = [
     name: 'Layout',
     component: Layout,
     redirect: '/home',
-    children: [],
+    children: [
+      {
+        path: 'home',
+        name: 'Home',
+        component: () => import('@/views/Home.vue')
+      }
+    ],
   },
   {
     path: '/forbidden',
@@ -104,6 +110,8 @@ export async function setupDynamicRoutes(menuList) {
     return;
   }
   const routes = transformMenuToRoutes(menuList);
+  console.log('转换后的路由:', routes);
+
   routes.forEach(route => {
     router.addRoute('Layout', route);
   });
