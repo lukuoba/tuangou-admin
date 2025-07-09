@@ -33,6 +33,14 @@ export default {
       method: 'delete',
     })
   },
+  // 更新菜单状态
+  updateMenuStatus(data) {
+    return request({
+      url: '/api/sys/menu/updateMenuStatus',
+      method: 'put',
+      data      // 请求参数
+    })
+  },
 
   /**
    * 日志管理

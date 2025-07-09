@@ -28,7 +28,7 @@ export default {
   // 编辑账号
   editCounts(data) {
     return request({
-      url: `/accounts/${data.id}`,  // 接口路径
+      url: `/api/sys/user/updateUser`,  // 接口路径
       method: 'put',    // 请求方式
       data      // 请求参数
     }) 
@@ -54,6 +54,14 @@ export default {
       url: `/accountId/${id}`,  // 接口路径
       method: 'get',    // 请求方式
     })  
+  },
+  // 更新用户状态
+  updateUserStatus(data) {
+    return request({
+      url: `/api/sys/user/updateUserStatus`,  // 接口路径
+      method: 'put',    // 请求方式
+      data      // 请求参数
+    })
   },
   // 上传配置
   uploadConfig(params) {

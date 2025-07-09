@@ -2,54 +2,93 @@
   <el-dialog
     v-model="dialogVisible"
     :title="title"
-    width="500px"
+    width="900px"
     :before-close="handleClose"
   >
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-      <!-- 账号输入框 -->
-      <el-form-item label="门店名称" prop="storeName">
-        <el-input v-model="form.storeName" placeholder="请输入门店名称" />
-      </el-form-item>
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <!-- 账号输入框 -->
+          <el-form-item label="门店名称" prop="store_name">
+            <el-input v-model="form.store_name" placeholder="请输入门店名称" />
+          </el-form-item>
 
-      <el-form-item label="所在地区" prop="location">
-        <RegionCascader v-model="form.location" @change="handleRegionChange" />
-      </el-form-item>
-      <el-form-item label="详细地址" prop="address">
-        <el-input v-model="form.address" placeholder="请输入详细地址" />
-      </el-form-item>
-      <el-form-item label="管理员" prop="adminId">
-        <UserSearchSelect v-model="form.adminId" @change="handleUserSelect" />
-      </el-form-item>
-      <el-form-item label="权限" prop="role">
-        <el-select v-model="form.role" placeholder="请选择权限">
-          <el-option label="一般用户" value="common" />
-          <el-option label="VIP用户" value="vip" />
-          <el-option label="特殊用户" value="special" />
-        </el-select>
-      </el-form-item>
+          <el-form-item label="所在地区" prop="location">
+            <RegionCascader
+              v-model="form.location"
+              @change="handleRegionChange"
+            />
+          </el-form-item>
+          <el-form-item label="详细地址" prop="address">
+            <el-input v-model="form.address" placeholder="请输入详细地址" />
+          </el-form-item>
+          <el-form-item label="手机号码" prop="phone">
+            <el-input v-model="form.phone" placeholder="请输入手机号码" />
+          </el-form-item>
+          <el-form-item label="分类" prop="category_id">
+            <el-select v-model="form.category_id" placeholder="请选择分类">
+              <el-option
+                v-for="item in categoryList"
+                :key="item.id"
+                :label="item.category_name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
 
-      <!-- 状态下拉选择框 -->
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="form.status" placeholder="请选择状态">
-          <el-option label="启用" value="start" />
-          <el-option label="禁用" value="forbid" />
-          <el-option label="缴费逾期" value="postpone" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="门头照片">
-        <PictureUpload
-          v-model="form.picture"
-          :max-count="1"
-          list-type="picture-card"
-        />
-      </el-form-item>
-      <el-form-item label="营业执照">
-        <PictureUpload
-          v-model="form.images"
-          :max-count="1"
-          list-type="picture-card"
-        />
-      </el-form-item>
+          <!-- 状态下拉选择框 -->
+          <el-form-item label="状态" prop="store_status">
+            <el-select v-model="form.store_status" placeholder="请选择状态">
+              <el-option label="启用" :value="1" />
+              <el-option label="禁用" :value="0" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="序列" prop="sort_no">
+            <el-input-number
+              v-model="form.sort_no"
+              placeholder="请输入序列号"
+              class="search-input"
+            />
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" placeholder="请输入备注" />
+          </el-form-item>
+          <el-form-item label="公告" prop="notice">
+            <el-input v-model="form.notice" placeholder="请输入公告" />
+          </el-form-item>
+          <el-form-item label="门头照片">
+            <PictureUpload
+              v-model="form.entrance_picture"
+              :max-count="3"
+              list-type="picture-card"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="营业执照">
+            <PictureUpload
+              v-model="form.business_license_picture"
+              :max-count="1"
+              list-type="picture-card"
+            />
+          </el-form-item>
+          <el-form-item label="食品许可证">
+            <PictureUpload
+              v-model="form.business_charter_picture"
+              :max-count="1"
+              list-type="picture-card"
+            />
+          </el-form-item>
+
+          <el-form-item label="室内照片">
+            <PictureUpload
+              v-model="form.indoor_picture"
+              :max-count="3"
+              list-type="picture-card"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <template #footer>
@@ -63,11 +102,11 @@
 import { ref, computed } from "vue";
 import RegionCascader from "@/components/RegionCascader.vue";
 import { getFullRegionPath } from "@/utils/regionUtil";
-import UserSearchSelect from "@/components/SelectUserId.vue";
-import PictureUpload from "@/components/PictureUpload.vue";
+import PictureUpload from "@/components/PictureUploadNew.vue";
+import _http from "@/api/stores";
 // 弹窗显示状态
 const dialogVisible = ref(false);
-
+const categoryList = ref([]);
 const { title, editId, editData, modelValue } = defineProps({
   title: {
     type: String,
@@ -89,23 +128,41 @@ const { title, editId, editData, modelValue } = defineProps({
 
 // 表单数据
 const form = ref({
-  storeName: "",
+  phone: "",
+  store_name: "",
   location: undefined,
   address: "", // 默认密码
-  role: "common", // 默认权限
-  status: "start", // 默认状态
+  category_id: "", // 默认权限
+  store_status: 1, // 默认状态
   adminId: "", // 管理员ID
   picture: [], // 门头图片
-  images: [], // 营业执照图片
+  business_license_picture: [], // 营业执照图片
+  remark: "",
+  sort_no: 1,
+  notice: "",
+  entrance_picture: [], // 门头照片
+  indoor_picture: [], // 室内照片
 });
-
+const validatePhone = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error("请输入手机号码"));
+  } else if (!/^1[3-9]\d{9}$/.test(value)) {
+    callback(new Error("请输入正确的手机号码"));
+  } else {
+    callback();
+  }
+};
 // 表单校验规则
 const rules = {
-  storeName: [{ required: true, message: "请输入账号名称", trigger: "blur" }],
+  phone: [
+    { required: true, message: "请输入手机号码", trigger: "blur" },
+    { validator: validatePhone, trigger: "blur" },
+  ],
+  store_name: [{ required: true, message: "请输入账号名称", trigger: "blur" }],
   location: [{ required: true, message: "请选择省市区", trigger: "blur" }],
   address: [{ required: true, message: "请输入详细地址", trigger: "blur" }],
-  role: [{ required: true, message: "请选择权限", trigger: "change" }],
-  status: [{ required: true, message: "请选择状态", trigger: "change" }],
+  category_id: [{ required: true, message: "请选择分类", trigger: "change" }],
+  store_status: [{ required: true, message: "请选择状态", trigger: "change" }],
 };
 
 // 表单引用
@@ -113,22 +170,34 @@ const formRef = ref(null);
 
 // 定义 emit
 const emit = defineEmits(["addaccount", "update:modelValue", "change"]);
-
+const getAllCategory = async () => {
+  const data = await _http.getAllCategory();
+  console.log("分类", data);
+  if (data.list) {
+    categoryList.value = data.list;
+  }
+};
 // 打开弹窗
 const openDialog = () => {
   dialogVisible.value = true;
+  getAllCategory();
   if (editId) {
     form.value = { ...editData }; // 使用解构赋值创建新对象，避免引用问题
   } else {
     form.value = {
-      storeName: "",
+      phone: "",
+      store_name: "",
       location: [],
       address: "", // 默认密码
-      role: "common", // 默认权限
-      status: "start", // 默认状态
+      category_id: "", // 默认权限
+      store_status: 1, // 默认状态
       adminId: "", // 管理员ID
       picture: [], // 门头图片
-      images: [],
+      business_license_picture: [],
+      remark: "",
+      sort_no: 1,
+      notice: "",
+      indoor_picture: [], // 室内照片
     };
   }
 };
@@ -152,7 +221,7 @@ const handleSubmit = () => {
   });
 };
 const displayRegion = computed(() => {
-  return getFullRegionPath(form.value.region);
+  return getFullRegionPath(form.value.location);
 });
 
 const handleRegionChange = (value) => {

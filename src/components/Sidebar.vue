@@ -51,37 +51,11 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { ref, computed } from "vue";
-import {
-  Star,
-  Avatar,
-  Tickets,
-  Document,
-  User,
-  Setting,
-  VideoCamera,
-  Link,
-  Management,
-  OfficeBuilding,
-  Film,
-} from "@element-plus/icons-vue";
+import { iconMap } from "@/utils/icon";
 
 const route = useRoute();
 const menuList = ref([]);
 
-// 图标映射
-const iconMap = {
-  Start: Star,
-  Share: Avatar,
-  Tickets: Tickets,
-  Document: Document,
-  User: User,
-  Setting: Setting,
-  VideoCamera: VideoCamera,
-  Link: Link,
-  Management: Management,
-  OfficeBuilding: OfficeBuilding,
-  Film: Film,
-};
 
 // 过滤隐藏的菜单项
 const filteredMenuList = computed(() => {

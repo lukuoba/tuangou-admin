@@ -19,8 +19,15 @@
         <el-form-item label="用户名称">
           <el-input v-model="searchForm.user_name" />
         </el-form-item>
+        <el-form-item label="微信用户标识">
+          <el-input v-model="searchForm.open_id" />
+        </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.user_status" placeholder="请选择状态">
+          <el-select
+            v-model="searchForm.user_status"
+            placeholder="请选择状态"
+            class="search-input"
+          >
             <el-option label="全部" :value="-1" />
             <el-option label="启用" :value="1" />
             <el-option label="禁用" :value="0" />
@@ -47,28 +54,38 @@
       <template #table-column>
         <el-table-column label="用户名" prop="user_name" />
         <el-table-column label="手机号" prop="phone" />
-        <!-- <el-table-column label="角色">
-            <template #default="scope">
-              <el-tag :type="getTagType(scope.row.role)">
-                {{ getTagLabel(scope.row.role) }}
-              </el-tag>
-            </template>
-          </el-table-column> -->
         <el-table-column label="状态">
-          <template #default="scope">
-            <el-tag :type="getTagStatus(scope.row.user_status)">
-              {{ getTagStatusLabel(scope.row.user_status) }}
-            </el-tag>
+          <template #default="{ row }">
+            <el-switch
+              v-model="row.user_status"
+              :inactive-text="row.user_status === 0 ? '禁用' : '启用'"
+              :active-value="1"
+              :inactive-value="0"
+              :loading="row.statusLoading"
+              @change="handleStatusChange(row)"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column label="角色" prop="role_name" />
+        <el-table-column label="用户头像">
+          <template #default="{ row }">
+            <el-image
+              :src="row.user_avatar"
+              :preview-src-list="row.user_avatar"
+              fit="cover"
+              style="width: 50px; height: 50px"
+            />
           </template>
         </el-table-column>
         <el-table-column label="创建时间" prop="created_at" />
         <el-table-column label="更新时间" prop="updated_at" />
+        <el-table-column label="备注" prop="remark" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button type="text" @click="handleEdit(scope.row)"
+            <el-button text type="primary" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
-            <el-button type="text" @click="handleDelete(scope.row.id)"
+            <el-button text type="danger" @click="handleDelete(scope.row.id)"
               >删除</el-button
             >
           </template>
@@ -79,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted,nextTick } from "vue";
+import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AddAccountDialog from "@/components/accounts/AddAccountDialog.vue";
 import SmartTable from "@/components/SmartTable.vue";
@@ -87,12 +104,13 @@ import _http from "@/api/account";
 
 const addAccountDialog = ref(null);
 const dialogTitle = ref("");
-const dialogId = ref("");
+const dialogId = ref(null);
 const dialogData = ref({});
 const searchForm = reactive({
   user_status: -1,
   phone: "",
   user_name: "",
+  open_id: "",
 });
 const smartTableRef = ref(null);
 const accountsData = ref([]);
@@ -123,6 +141,8 @@ const handleEdit = (row) => {
 const handleAddAccount = async (formData) => {
   try {
     const isEdit = !!formData.id;
+    formData.user_avatar = typeof formData.user_avatar == 'object' ? formData.user_avatar[0] : formData.user_avatar;
+    console.log('formData',formData,typeof formData.user_avatar)
     await (isEdit ? _http.editCounts(formData) : _http.addCounts(formData));
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
@@ -132,52 +152,6 @@ const handleAddAccount = async (formData) => {
   }
 };
 
-const getTagLabel = (role) => {
-  const roleMap = {
-    admin: "管理员",
-    common: "普通用户",
-    vip: "VIP",
-    special: "特殊用户",
-  };
-  return roleMap[role] || "未知角色";
-};
-
-const getTagType = (role) => {
-  switch (role) {
-    case "admin":
-      return "success";
-    case "common":
-      return "info";
-    case "vip":
-      return "warning";
-    case "special":
-      return "danger";
-    default:
-      return "";
-  }
-};
-
-const getTagStatus = (status) => {
-  switch (status) {
-    case "start":
-      return "success";
-    case "forbid":
-      return "warning";
-    case "postpone":
-      return "danger";
-    default:
-      return "";
-  }
-};
-
-const getTagStatusLabel = (status) => {
-  const statusMap = {
-    start: "启用",
-    forbid: "禁用",
-    postpone: "缴费逾期",
-  };
-  return statusMap[status] || "未知状态";
-};
 
 // 初始化时触发请求
 onMounted(() => {
@@ -226,11 +200,32 @@ const handlePaginationChange = (params) => {
   searchParams.value = { ...searchParams.value, ...params };
   fetchUserList();
 };
+// 处理状态变更
+const handleStatusChange = async (row) => {
+  row.statusLoading = true; // 开启加载状态
+  try {
+    // 调用修改状态接口
+    const response = await _http.updateUserStatus({
+      ids: [row.id],
+      user_status: row.user_status,
+    });
+    ElMessage.success(response.message || "状态更新成功");
+  } catch (error) {
+    // 状态变更失败，恢复原状态
+    row.user_status = row.user_status === 1 ? 0 : 1;
+    ElMessage.error(error.message || "状态更新失败");
+  } finally {
+    row.statusLoading = false; // 关闭加载状态
+  }
+};
 </script>
 
 <style scoped>
 .top-action {
   display: flex;
   justify-content: space-between;
+}
+.search-input {
+  width: 192px;
 }
 </style>

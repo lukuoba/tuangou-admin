@@ -34,6 +34,23 @@
           <el-option label="缴费逾期" value="postpone" />
         </el-select>
       </el-form-item>
+      <el-form-item label="角色" prop="role_id">
+        <el-select v-model="form.role_id" placeholder="请选择角色">
+          <el-option
+            v-for="item in roleData"
+            :key="item.id"
+            :label="item.role_name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="用户头像">
+        <PictureUpload
+          v-model="form.user_avatar"
+          :max-count="1"
+          list-type="picture-card"
+        />
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="form.remark" placeholder="请输入备注" />
       </el-form-item>
@@ -48,10 +65,11 @@
 
 <script setup>
 import { ref } from "vue";
-
+import _http from "@/api/admin";
+import PictureUpload from "@/components/PictureUploadNew.vue";
 // 弹窗显示状态
 const dialogVisible = ref(false);
-
+const roleData = ref([]);
 const { title, editId, editData } = defineProps({
   title: {
     type: String,
@@ -75,6 +93,7 @@ const form = ref({
   // password: "123456", // 默认密码
   user_status: 1, // 默认状态
   user_key: "",
+  user_avatar: [],
 });
 
 // 表单校验规则
@@ -99,9 +118,18 @@ const formRef = ref(null);
 const emit = defineEmits(["addaccount"]);
 
 // 打开弹窗
-const openDialog = () => {
+const openDialog = async () => {
   dialogVisible.value = true;
-  console.log("id", editId, editData);
+  try {
+    let params = {
+      page_num: 1,
+      page_size: 100,
+    };
+    const res = await _http.getRoleList(params);
+    roleData.value = res.list;
+  } catch (error) {
+    console.error("获取角色列表失败:", error);
+  }
   if (editId) {
     form.value = { ...editData }; // 使用解构赋值创建新对象，避免引用问题
   } else {
@@ -112,6 +140,7 @@ const openDialog = () => {
       user_status: 1,
       remark: "",
       user_key: "",
+      user_avatar: [],
     };
   }
 };

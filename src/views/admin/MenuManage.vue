@@ -28,16 +28,21 @@
         <el-table-column prop="menu_icon" label="菜单图标" width="100">
           <template #default="{ row }">
             <el-icon v-if="row.menu_icon">
-              <component :is="row.menu_icon" />
+              <component :is="iconMap[row.menu_icon]" />
             </el-icon>
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="menu_status" label="状态" width="100">
+        <el-table-column prop="menu_status" label="状态">
           <template #default="{ row }">
-            <el-tag :type="row.menu_status === 1 ? 'success' : 'danger'">
-              {{ row.menu_status === 1 ? "启用" : "禁用" }}
-            </el-tag>
+            <el-switch
+              v-model="row.menu_status"
+              :inactive-text="row.menu_status === 0 ? '禁用' : '启用'"
+              :active-value="1"
+              :inactive-value="0"
+              :loading="row.statusLoading"
+              @change="handleStatusChange(row)"
+            />
           </template>
         </el-table-column>
         <el-table-column prop="created_by" label="创建人" width="100" />
@@ -47,6 +52,7 @@
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button
+              text
               type="primary"
               size="small"
               @click.stop="handleEdit(row)"
@@ -54,18 +60,12 @@
               编辑
             </el-button>
             <el-button
+              text
               type="danger"
               size="small"
               @click.stop="handleDelete(row.id)"
             >
               删除
-            </el-button>
-            <el-button
-              type="success"
-              size="small"
-              @click.stop="handleDetail(row)"
-            >
-              详情
             </el-button>
           </template>
         </el-table-column>
@@ -79,10 +79,11 @@ import { ref, reactive, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import MenuManage from "@/components/menu/MenuCreated.vue";
 import TreeTable from "@/components/TreeTable.vue";
+import { iconMap } from "@/utils/icon";
 import _http from "@/api/admin";
 const addAccountDialog = ref(null);
 const dialogTitle = ref("");
-const dialogId = ref("");
+const dialogId = ref(null);
 const dialogData = ref({});
 const smartTableRef = ref(null);
 // 表格数据
@@ -99,7 +100,7 @@ const loadData = async () => {
   } catch (error) {
     console.error("加载数据失败:", error);
     ElMessage.error("加载数据失败");
-  }finally {
+  } finally {
     loading.value = false;
   }
 };
@@ -107,11 +108,6 @@ const loadData = async () => {
 // 行点击事件
 const handleRowClick = (row) => {
   console.log("行点击:", row);
-};
-
-// 详情按钮
-const handleDetail = (row) => {
-  console.log("详情:", row);
 };
 
 // 搜索事件
@@ -166,7 +162,7 @@ onMounted(() => {
 // 删除账号
 const handleDelete = async (id) => {
   try {
-    await ElMessageBox.confirm("确定删除该用户吗？", "提示", {
+    await ElMessageBox.confirm("确定删除该菜单吗？", "提示", {
       type: "warning",
     });
     const res = await _http.deleteMenu(id);
@@ -177,6 +173,25 @@ const handleDelete = async (id) => {
     if (error !== "cancel") {
       ElMessage.error(error.message || "删除失败");
     }
+  }
+};
+
+// 处理状态变更
+const handleStatusChange = async (row) => {
+  row.statusLoading = true; // 开启加载状态
+  try {
+    // 调用修改状态接口
+    const response = await _http.updateMenuStatus({
+      ids: [row.id],
+      menu_status: row.menu_status,
+    });
+    ElMessage.success(response.message || "状态更新成功");
+  } catch (error) {
+    // 状态变更失败，恢复原状态
+    row.menu_status = row.menu_status === 1 ? 0 : 1;
+    ElMessage.error(error.message || "状态更新失败");
+  } finally {
+    row.statusLoading = false; // 关闭加载状态
   }
 };
 </script>

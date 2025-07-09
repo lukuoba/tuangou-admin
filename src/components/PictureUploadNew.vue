@@ -43,12 +43,15 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { Plus, ZoomIn, Delete } from "@element-plus/icons-vue";
 import { ElMessage, ElDialog } from "element-plus";
 import _http from "@/api/account";
 import axios from "axios";
-import type { UploadProps, UploadFile as OriginalUploadFile } from "element-plus";
+import type {
+  UploadProps,
+  UploadFile as OriginalUploadFile,
+} from "element-plus";
 
 // 扩展 UploadFile 类型，添加 uid 属性
 interface UploadFile extends OriginalUploadFile {
@@ -72,22 +75,39 @@ const props = withDefaults(defineProps<Props>(), {
 
 const modelValue = defineModel<string[]>("modelValue", {
   type: Array as () => string[],
-  default: () => []
+  default: () => [],
 });
 
-const fileList = ref<UploadFile[]>([])
-
-watch(() => modelValue.value, (value) => {
- if (value) {
-  fileList.value = value.map((item) => ({
-    uid: uuidv4(),
-    name: item,
-    url: item,
-  })) as unknown as UploadFile[];
- }
-}, {
-  immediate: true
-})
+const fileList = ref<UploadFile[]>([]);
+interface UploadFile extends OriginalUploadFile {
+  uid: string; // 修改为 string 类型
+}
+watch(
+  () => modelValue.value,
+  (value) => {
+    console.log("初始", value);
+    if (value) {
+      if (typeof value === "string") {
+        fileList.value = [
+          {
+            uid: uuidv4(),
+            name: value,
+            url: value,
+          },
+        ];
+      } else {
+        fileList.value = value.map((item) => ({
+          uid: uuidv4(),
+          name: item,
+          url: item,
+        })) as unknown as UploadFile[];
+      }
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 
 // 允许的文件类型
 const acceptTypes = ["image/jpeg", "image/png", "image/jpg"];
@@ -121,7 +141,7 @@ const beforeUpload: UploadProps["beforeUpload"] = async (file) => {
   // 手动添加唯一标识
   (file as any).uid = uuidv4();
 
-  return true
+  return true;
 };
 
 // 自定义上传
@@ -141,9 +161,7 @@ const handleUpload: UploadProps["httpRequest"] = async (options) => {
       withCredentials: false,
     });
 
-    modelValue.value = [
-      data.access_url
-    ]
+    modelValue.value = [data.access_url];
   } catch (error) {
     ElMessage.error("上传失败");
     console.error("上传错误:", error);
@@ -159,7 +177,7 @@ const handlePreview = (file) => {
 
 // 文件移除处理
 const handleRemove = (file: UploadFile) => {
-  console.log({file})
+  console.log({ file });
   fileList.value = fileList.value.filter((f: UploadFile) => f.uid !== file.uid);
 };
 
@@ -167,7 +185,6 @@ const handleRemove = (file: UploadFile) => {
 const handleExceed: UploadProps["onExceed"] = () => {
   ElMessage.warning(`最多只能上传 ${props.maxCount} 张图片`);
 };
-
 </script>
 
 <style scoped>
