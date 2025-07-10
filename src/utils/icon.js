@@ -10,6 +10,7 @@ import {
     Management,
     OfficeBuilding,
     Film,
+    Goods
 } from "@element-plus/icons-vue";
 // 图标映射
 const iconMap = {
@@ -24,6 +25,7 @@ const iconMap = {
     Management: Management,
     OfficeBuilding: OfficeBuilding,
     Film: Film,
+    Goods:Goods
 };
 export {
     iconMap

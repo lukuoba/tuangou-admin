@@ -47,7 +47,12 @@
         </el-table-column>
         <el-table-column prop="created_by" label="创建人" width="100" />
         <el-table-column prop="created_at" label="创建时间" width="180" />
-
+        <el-table-column prop="updated_by" label="更新人" width="100" />
+        <el-table-column prop="is_hide_menu" label="是否隐藏">
+          <template #default="{ row }">
+            {{ row.is_hide_menu?'是':'否' }}
+          </template>
+        </el-table-column>
         <!-- 自定义操作列 -->
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
@@ -143,9 +148,7 @@ const handleAddAccount = async (formData) => {
       : await _http.addMune(formData);
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
-
-    // 方法1：直接调用子组件的refresh方法（推荐）
-    smartTableRef.value.refresh();
+    loadData()
     // 添加成功后刷新账户列表
   } catch (error) {
     ElMessage.error(error.message || "操作失败");

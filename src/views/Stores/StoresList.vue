@@ -18,8 +18,22 @@
         :model="searchForm"
         @submit.prevent="handleSearch"
       >
+      <el-form-item label="店铺名称">
+          <el-input v-model="searchForm.store_name" />
+        </el-form-item>
         <el-form-item label="手机号码">
           <el-input v-model="searchForm.phone" />
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select
+            v-model="searchForm.store_status"
+            placeholder="请选择状态"
+            class="search-input"
+          >
+            <el-option label="全部" :value="-1" />
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
+          </el-select>
         </el-form-item>
         <el-form-item
           ><el-button type="primary" native-type="submit"
@@ -27,101 +41,114 @@
           ></el-form-item
         >
       </el-form>
-
-      <!-- <SmartTable
+      <SmartTable
         ref="smartTableRef"
-        :fetch-data="fetchUserList"
-        :request-params="searchParams"
-        :columns="columns"
+        :tableData="storesData"
+        :total="total"
+        :loading="isLoading"
+        :requestParams="searchParams"
+        @pagination-change="handlePaginationChange"
       >
-      </SmartTable> -->
+        <!-- 表格列 -->
+        <template #table-column>
+          <el-table-column label="店铺名称" prop="store_name" />
+          <el-table-column label="号码" prop="phone" />
+          <el-table-column label="详细地址" prop="detail_address" />
+          <el-table-column label="营业执照图片">
+            <template #default="scope">
+              <el-image
+                v-for="(img, index) in scope.row.business_license_picture"
+                :key="index"
+                :src="img"
+                :preview-src-list="[img]"
+                class="table-image"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="食品安全许可证">
+            <template #default="scope">
+              <el-image
+                v-for="(img, index) in scope.row.business_charter_picture"
+                :key="index"
+                :src="img"
+                :preview-src-list="[img]"
+                class="table-image"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="门头图片">
+            <template #default="scope">
+              <el-image
+                v-for="(img, index) in scope.row.entrance_picture"
+                :key="index"
+                :src="img"
+                :preview-src-list="[img]"
+                class="table-image"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="室内图片">
+            <template #default="scope">
+              <el-image
+                v-for="(img, index) in scope.row.indoor_picture"
+                :key="index"
+                :src="img"
+                :preview-src-list="[img]"
+                class="table-image"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column label="状态">
+          <template #default="{ row }">
+            <el-switch
+              v-model="row.store_status"
+              :inactive-text="row.store_status === 0 ? '禁用' : '启用'"
+              :active-value="1"
+              :inactive-value="0"
+              :loading="row.statusLoading"
+              @change="handleStatusChange(row)"
+            />
+          </template>
+        </el-table-column>
+          <el-table-column label="备注" prop="remark" />
+          <el-table-column label="创建者" prop="created_by" />
+          <el-table-column label="更新者" prop="updated_by" />
+          <el-table-column label="更新时间" prop="updated_at" />
+          <el-table-column label="操作">
+          <template #default="scope">
+            <el-button text type="primary" @click="handleEdit(scope.row)"
+              >编辑</el-button
+            >
+            <el-button text type="danger" @click="handleDelete(scope.row.id)"
+              >删除</el-button
+            >
+          </template> 
+        </el-table-column>
+        </template>
+      </SmartTable>
     </div>
   </div>
 </template>
 
-<script setup lang="jsx">
-import { ref, reactive, onMounted, nextTick,toRaw } from "vue";
+<script setup>
+import { ref, reactive, onMounted, nextTick, toRaw } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { formatDateVNode } from "@/utils/dateUtil";
 import AddOrEditStrores from "@/components/stores/AddOrEditStrores.vue";
 import SmartTable from "@/components/SmartTable.vue";
-import { getFullRegionName } from "@/utils/regionUtil.js";
 import _http from "@/api/stores.js";
 const addEditDialog = ref(null);
 const dialogTitle = ref("");
-const dialogId = ref("");
+const dialogId = ref(null);
 const dialogData = ref({});
 const searchForm = reactive({
   phone: "", // 手机号码
+  store_status:-1,
+  store_name:''
 });
 const smartTableRef = ref(null);
-// 账户列表title
-const columns = ref([
-  { label: "门店名称", prop: "storeName" },
-  {
-    label: "地址",
-    prop: "location",
-    render: (row) => {
-      return (
-        <span>
-          {getFullRegionName(row.location)}
-          {row.address}
-        </span>
-      );
-    },
-  },
-  {
-    label: "角色",
-    prop: "role",
-    render: (row) => {
-      const tagType = getTagType(row.role);
-      // 只有有类型时才设置 type
-      return tagType ? (
-        <el-tag type={tagType}>{getTagLabel(row.role)}</el-tag>
-      ) : (
-        <span>{getTagLabel(row.role)}</span>
-      );
-    },
-  },
-  {
-    label: "状态",
-    prop: "status",
-    render: (row) => {
-      const tagType = getTagStatus(row.status);
-      return tagType ? (
-        <el-tag type={tagType}>{getTagStatusLabel(row.status)}</el-tag>
-      ) : (
-        <span>{getTagStatusLabel(row.status)}</span>
-      );
-    },
-  },
-  {
-    label: "创建时间",
-    prop: "createdAt",
-    render: (row) => formatDateVNode(row.createdAt, "YYYY-MM-DD HH:mm"),
-  },
-  {
-    label: "更新时间",
-    prop: "updatedAt",
-    render: (row) => formatDateVNode(row.updatedAt, "YYYY-MM-DD HH:mm"),
-  },
-  {
-    label: "操作",
-    prop: "operation",
-    render: (row) => {
-      return (
-        <div>
-          <el-button type="text" onClick={() => handleEdit(row)}>
-            编辑
-          </el-button>
-          <el-button type="text" onClick={() => handleDelete(row._id)}>
-            删除
-          </el-button>
-        </div>
-      );
-    },
-  },
-]);
+const storesData = ref([]);
+const total = ref(0);
+const isLoading = ref(false);
 
 // 打开新增账号弹窗
 const openAddAccountDialog = () => {
@@ -134,10 +161,8 @@ const openAddAccountDialog = () => {
 // 打开编辑账号弹窗
 const handleEdit = (row) => {
   dialogTitle.value = "编辑门店";
-  dialogId.value = row._id;
-  console.log("编辑id", row);
-  dialogData.value = JSON.parse(JSON.stringify(toRaw(row)))
-  console.log("shuju", dialogData.value);
+  dialogId.value = row.id;
+  dialogData.value = JSON.parse(JSON.stringify(toRaw(row)));
   nextTick(() => {
     addEditDialog.value.openDialog();
   });
@@ -146,105 +171,93 @@ const handleEdit = (row) => {
 const handleAddAccount = async (formData) => {
   console.log(formData);
   try {
-    const isEdit = !!formData._id;
+    const isEdit = !!formData.id;
     const response = isEdit
       ? await _http.editStores(formData)
       : await _http.addStores(formData);
-
+    console.log("response", response);
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
-
-    // 方法1：直接调用子组件的refresh方法（推荐）
-    smartTableRef.value.refresh();
-    // 添加成功后刷新账户列表
+    nextTick(() => {
+      addEditDialog.value.openDialog();
+    });
+    fetchUserList()
   } catch (error) {
     ElMessage.error(error.message || "操作失败");
   }
 };
+  
 
-const getTagLabel = (role) => {
-  const roleMap = {
-    admin: "管理员",
-    common: "普通用户",
-    vip: "VIP",
-    special: "特殊用户",
-  };
-  return roleMap[role] || "未知角色";
-};
 
-const getTagType = (role) => {
-  switch (role) {
-    case "admin":
-      return "success";
-    case "common":
-      return "info";
-    case "vip":
-      return "warning";
-    case "special":
-      return "danger";
-    default:
-      return "";
-  }
-};
-
-const getTagStatus = (status) => {
-  switch (status) {
-    case "start":
-      return "success";
-    case "forbid":
-      return "warning";
-    case "postpone":
-      return "danger";
-    default:
-      return "";
-  }
-};
-
-const getTagStatusLabel = (status) => {
-  const statusMap = {
-    start: "启用",
-    forbid: "禁用",
-    postpone: "缴费逾期",
-  };
-  return statusMap[status] || "未知状态";
+// 分页变化处理
+const handlePaginationChange = (params) => {
+  searchParams.value = { ...searchParams.value, ...params };
+  fetchUserList();
 };
 
 const searchParams = ref({});
 // 初始化时触发请求
 onMounted(() => {
   // 初始化搜索参数（如果需要）
-  // searchParams.value = { ...searchForm };
-  // fetchUserList();
+  searchParams.value = { ...searchForm };
+  fetchUserList();
 });
 // 请求方法（由父组件实现）
 const fetchUserList = async (params) => {
-  // 实际项目中这里调用API
-  const res = await _http.getStoresList(params);
-  console.log("用户列表数据", res);
-  return {
-    list: res.data,
-    total: res.total,
-  };
+  isLoading.value = true;
+  try {
+    const res = await _http.getStoresList(searchParams.value);
+    storesData.value = res.list;
+    total.value = res.total;
+  } catch (error) {
+    console.error("获取用户列表失败:", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // 搜索触发
 const handleSearch = () => {
+  const phone = searchForm.phone;
+  if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
+    ElMessage.warning('请输入有效的手机号码');
+    return;
+  }
   searchParams.value = { ...searchForm };
+  fetchUserList(); // 触发搜索请求
 };
 
 // 删除账号
 const handleDelete = async (id) => {
   try {
-    await ElMessageBox.confirm("确定删除该用户吗？", "提示", {
+    await ElMessageBox.confirm("确定删除该店铺吗？", "提示", {
       type: "warning",
     });
     const res = await _http.deleteStores(id);
     console.log("删除成功", res);
     ElMessage.success("删除成功");
-    smartTableRef.value.refresh();
+    fetchUserList();
   } catch (error) {
     if (error !== "cancel") {
       ElMessage.error(error.message || "删除失败");
     }
+  }
+};
+// 处理状态变更
+const handleStatusChange = async (row) => {
+  row.statusLoading = true; // 开启加载状态
+  try {
+    // 调用修改状态接口
+    const response = await _http.updateStoreStatus({
+      ids: [row.id],
+      store_status: row.store_status,
+    });
+    ElMessage.success(response.message || "状态更新成功");
+  } catch (error) {
+    // 状态变更失败，恢复原状态
+    row.store_status = row.store_status === 1 ? 0 : 1;
+    ElMessage.error(error.message || "状态更新失败");
+  } finally {
+    row.statusLoading = false; // 关闭加载状态
   }
 };
 </script>
@@ -253,5 +266,14 @@ const handleDelete = async (id) => {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
+}
+.table-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  cursor: pointer;
+}
+.search-input {
+  width: 192px;
 }
 </style>

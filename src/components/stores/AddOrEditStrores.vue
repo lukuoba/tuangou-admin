@@ -13,14 +13,17 @@
             <el-input v-model="form.store_name" placeholder="请输入门店名称" />
           </el-form-item>
 
-          <el-form-item label="所在地区" prop="location">
+          <el-form-item label="所在地区" prop="address_code">
             <RegionCascader
-              v-model="form.location"
+              v-model="form.address_code"
               @change="handleRegionChange"
             />
           </el-form-item>
-          <el-form-item label="详细地址" prop="address">
-            <el-input v-model="form.address" placeholder="请输入详细地址" />
+          <el-form-item label="详细地址" prop="detail_address">
+            <el-input
+              v-model="form.detail_address"
+              placeholder="请输入详细地址"
+            />
           </el-form-item>
           <el-form-item label="手机号码" prop="phone">
             <el-input v-model="form.phone" placeholder="请输入手机号码" />
@@ -42,6 +45,24 @@
               <el-option label="启用" :value="1" />
               <el-option label="禁用" :value="0" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="开始营业" prop="start_business_time">
+            <el-time-picker
+              v-model="form.start_business_time"
+              format="HH:mm:ss"
+              placeholder="请选择开始营业时间"
+              type="time"
+              value-format="HH:mm:ss"
+            />
+          </el-form-item>
+          <el-form-item label="结束营业" prop="end_business_time">
+            <el-time-picker
+              v-model="form.end_business_time"
+              format="HH:mm:ss"
+              placeholder="请选择结束营业时间"
+              type="time"
+              value-format="HH:mm:ss"
+            />
           </el-form-item>
           <el-form-item label="序列" prop="sort_no">
             <el-input-number
@@ -130,18 +151,19 @@ const { title, editId, editData, modelValue } = defineProps({
 const form = ref({
   phone: "",
   store_name: "",
-  location: undefined,
-  address: "", // 默认密码
+  address_code: undefined,
+  detail_address: "", // 默认密码
   category_id: "", // 默认权限
   store_status: 1, // 默认状态
-  adminId: "", // 管理员ID
-  picture: [], // 门头图片
   business_license_picture: [], // 营业执照图片
   remark: "",
   sort_no: 1,
   notice: "",
   entrance_picture: [], // 门头照片
   indoor_picture: [], // 室内照片
+  business_charter_picture: [], // 食品许可证
+  start_business_time: null,
+  end_business_time: null,
 });
 const validatePhone = (rule, value, callback) => {
   if (!value) {
@@ -159,10 +181,18 @@ const rules = {
     { validator: validatePhone, trigger: "blur" },
   ],
   store_name: [{ required: true, message: "请输入账号名称", trigger: "blur" }],
-  location: [{ required: true, message: "请选择省市区", trigger: "blur" }],
-  address: [{ required: true, message: "请输入详细地址", trigger: "blur" }],
+  address_code: [{ required: true, message: "请选择省市区", trigger: "blur" }],
+  detail_address: [
+    { required: true, message: "请输入详细地址", trigger: "blur" },
+  ],
   category_id: [{ required: true, message: "请选择分类", trigger: "change" }],
   store_status: [{ required: true, message: "请选择状态", trigger: "change" }],
+  start_business_time: [
+    { required: true, message: "请选择开始营业时间", trigger: "change" },
+  ],
+  end_business_time: [
+    { required: true, message: "请选择结束营业时间", trigger: "change" },
+  ],
 };
 
 // 表单引用
@@ -187,17 +217,19 @@ const openDialog = () => {
     form.value = {
       phone: "",
       store_name: "",
-      location: [],
-      address: "", // 默认密码
+      address_code: [],
+      detail_address: "", // 默认密码
       category_id: "", // 默认权限
       store_status: 1, // 默认状态
-      adminId: "", // 管理员ID
-      picture: [], // 门头图片
       business_license_picture: [],
       remark: "",
       sort_no: 1,
       notice: "",
       indoor_picture: [], // 室内照片
+      entrance_picture: [],
+      business_charter_picture: [], // 食品许可证
+      start_business_time: null,
+      end_business_time: null,
     };
   }
 };
@@ -214,14 +246,14 @@ const handleSubmit = () => {
     if (valid) {
       console.log("表单数据", form.value);
       emit("addaccount", form.value); // 触发父组件的 addaccount 方法
-      handleClose(); // 关闭弹窗
+      // handleClose(); // 关闭弹窗
     } else {
       console.log("表单校验失败");
     }
   });
 };
 const displayRegion = computed(() => {
-  return getFullRegionPath(form.value.location);
+  return getFullRegionPath(form.value.address_code);
 });
 
 const handleRegionChange = (value) => {

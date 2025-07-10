@@ -55,7 +55,7 @@ export default {
 //   获取门店列表
   getStoresList(params) {
     return request({
-      url: '/store/list',  // 接口路径
+      url: '/api/sts/store/selectStoreList',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     })
@@ -71,8 +71,16 @@ export default {
   // 删除门店
   deleteStores(_id) {
     return request({
-      url: `/api/sts/store/deleteStore${_id}`,  // 接口路径
+      url: `/api/sts/store/deleteStore?ids=${[_id]}`,  // 接口路径
       method: 'delete',    // 请求方式
     })
   },
+  // 更新门店状态
+  updateStoreStatus(data) {
+    return request({
+      url: `/api/sts/store/updateStoreStatus`,  // 接口路径
+      method: 'put',    // 请求方式
+      data      // 请求参数
+    })
+  }
 }
