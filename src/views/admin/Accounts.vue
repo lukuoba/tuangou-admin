@@ -77,6 +77,7 @@
             />
           </template>
         </el-table-column>
+        <el-table-column label="店铺" prop="store_name" />
         <el-table-column label="创建时间" prop="created_at" />
         <el-table-column label="更新时间" prop="updated_at" />
         <el-table-column label="备注" prop="remark" />
@@ -141,8 +142,11 @@ const handleEdit = (row) => {
 const handleAddAccount = async (formData) => {
   try {
     const isEdit = !!formData.id;
-    formData.user_avatar = typeof formData.user_avatar == 'object' ? formData.user_avatar[0] : formData.user_avatar;
-    console.log('formData',formData,typeof formData.user_avatar)
+    formData.user_avatar =
+      typeof formData.user_avatar == "object"
+        ? formData.user_avatar[0]
+        : formData.user_avatar;
+    console.log("formData", formData, typeof formData.user_avatar);
     await (isEdit ? _http.editCounts(formData) : _http.addCounts(formData));
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
@@ -151,7 +155,6 @@ const handleAddAccount = async (formData) => {
     ElMessage.error(error.message || "操作失败");
   }
 };
-
 
 // 初始化时触发请求
 onMounted(() => {

@@ -63,7 +63,7 @@ export default {
   // 编辑门店
   editStores(data) {
     return request({
-      url: `/api/sts/store/updateStore${data._id}`,  // 接口路径
+      url: `/api/sts/store/updateStore`,  // 接口路径
       method: 'put',    // 请求方式
       data      // 请求参数
     })

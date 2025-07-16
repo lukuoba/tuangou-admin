@@ -164,6 +164,7 @@ const handleAccountLogin = async () => {
     loading.value = true;
     const loginRes = await _http.login(accountForm.value);
     setToken(loginRes.access_token);
+    localStorage.setItem("UserMessage", JSON.stringify(loginRes));
     // 2. 获取菜单
     const menuRes = await Http_s.getMenuList();
     const menuData = menuRes.list;
@@ -207,36 +208,23 @@ const handleSmsLogin = () => {
 
 <style scoped>
 .login-container {
+  background-image: url('@/assets/back-picture.jpg');
   width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   height: 100vh;
-  padding-top: 20vh;
-  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-  box-sizing: border-box;
+  background-size: cover; 
+  /* 让背景图片居中显示 */
+  background-position: center; 
+
 }
 
-@keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
 
 .login-title-container {
   text-align: center;
-  margin-bottom: 20px;
+  margin: 160px 0 20px 0;
 }
 
 .system-title {

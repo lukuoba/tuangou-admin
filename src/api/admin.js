@@ -148,6 +148,33 @@ export default {
       }
     })
   },
+  // 更新角色状态
+  updateRoleStatus(data) {
+    return request({
+      url: `api/sys/role/updateRoleStatus`,
+      method: 'put',
+      data
+    })
+  },
+  // 查询角色与菜单关联
+  getRoleMenuList(id) {
+    return request({
+      url: `/api/sys/role/selectRoleMenuList`,
+      method: 'get',
+      params: {
+        role_id: id
+      }
+    })
+  },
+  // 更新角色菜单
+  updateRoleMenu(data) {
+    return request({
+      url: `/api/sys/role/updateRoleMenuList`,
+      method: 'put',
+      data
+    })
+  },
+
 
 
 

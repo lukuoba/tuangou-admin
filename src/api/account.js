@@ -70,5 +70,21 @@ export default {
       method: 'get',    // 请求方式
       params      // 请求参数
     }) 
-  }
+  },
+  // 查询用户与店铺关联
+  getStoreList(id) {
+    return request({
+      url: `/api/sys/user/selectUserStoreList`,  // 接口路径
+      method: 'get',    // 请求方式
+    })
+  },
+  // 更新用户与店铺关联
+  updateUserStoreAssociation(data) {
+    return request({
+      url: `/api/sys/user/updateUserStoreList`,  // 接口路径
+      method: 'put',    // 请求方式
+      data      // 请求参数
+    })
+  },
+
 }

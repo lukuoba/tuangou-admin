@@ -18,7 +18,7 @@
         :model="searchForm"
         @submit.prevent="handleSearch"
       >
-      <el-form-item label="店铺名称">
+        <el-form-item label="店铺名称">
           <el-input v-model="searchForm.store_name" />
         </el-form-item>
         <el-form-item label="手机号码">
@@ -54,6 +54,7 @@
           <el-table-column label="店铺名称" prop="store_name" />
           <el-table-column label="号码" prop="phone" />
           <el-table-column label="详细地址" prop="detail_address" />
+          <el-table-column label="分类" prop="category_name" />
           <el-table-column label="营业执照图片">
             <template #default="scope">
               <el-image
@@ -99,31 +100,31 @@
             </template>
           </el-table-column>
           <el-table-column label="状态">
-          <template #default="{ row }">
-            <el-switch
-              v-model="row.store_status"
-              :inactive-text="row.store_status === 0 ? '禁用' : '启用'"
-              :active-value="1"
-              :inactive-value="0"
-              :loading="row.statusLoading"
-              @change="handleStatusChange(row)"
-            />
-          </template>
-        </el-table-column>
+            <template #default="{ row }">
+              <el-switch
+                v-model="row.store_status"
+                :inactive-text="row.store_status === 0 ? '禁用' : '启用'"
+                :active-value="1"
+                :inactive-value="0"
+                :loading="row.statusLoading"
+                @change="handleStatusChange(row)"
+              />
+            </template>
+          </el-table-column>
           <el-table-column label="备注" prop="remark" />
           <el-table-column label="创建者" prop="created_by" />
           <el-table-column label="更新者" prop="updated_by" />
           <el-table-column label="更新时间" prop="updated_at" />
           <el-table-column label="操作">
-          <template #default="scope">
-            <el-button text type="primary" @click="handleEdit(scope.row)"
-              >编辑</el-button
-            >
-            <el-button text type="danger" @click="handleDelete(scope.row.id)"
-              >删除</el-button
-            >
-          </template> 
-        </el-table-column>
+            <template #default="scope">
+              <el-button text type="primary" @click="handleEdit(scope.row)"
+                >编辑</el-button
+              >
+              <el-button text type="danger" @click="handleDelete(scope.row.id)"
+                >删除</el-button
+              >
+            </template>
+          </el-table-column>
         </template>
       </SmartTable>
     </div>
@@ -142,8 +143,8 @@ const dialogId = ref(null);
 const dialogData = ref({});
 const searchForm = reactive({
   phone: "", // 手机号码
-  store_status:-1,
-  store_name:''
+  store_status: -1,
+  store_name: "",
 });
 const smartTableRef = ref(null);
 const storesData = ref([]);
@@ -177,16 +178,11 @@ const handleAddAccount = async (formData) => {
       : await _http.addStores(formData);
     console.log("response", response);
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
-    nextTick(() => {
-      addEditDialog.value.openDialog();
-    });
-    fetchUserList()
+    fetchUserList();
   } catch (error) {
     ElMessage.error(error.message || "操作失败");
   }
 };
-  
-
 
 // 分页变化处理
 const handlePaginationChange = (params) => {
@@ -219,7 +215,7 @@ const fetchUserList = async (params) => {
 const handleSearch = () => {
   const phone = searchForm.phone;
   if (phone && !/^1[3-9]\d{9}$/.test(phone)) {
-    ElMessage.warning('请输入有效的手机号码');
+    ElMessage.warning("请输入有效的手机号码");
     return;
   }
   searchParams.value = { ...searchForm };

@@ -246,7 +246,7 @@ const handleSubmit = () => {
     if (valid) {
       console.log("表单数据", form.value);
       emit("addaccount", form.value); // 触发父组件的 addaccount 方法
-      // handleClose(); // 关闭弹窗
+      handleClose(); // 关闭弹窗
     } else {
       console.log("表单校验失败");
     }
