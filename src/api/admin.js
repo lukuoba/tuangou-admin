@@ -13,7 +13,7 @@ export default {
   //   查询菜单列表
   getMenuList(params) {
     return request({
-      url: '/api/sys/menu/selectMenuList',
+      url: '/api/sys/menu/selectMenuTree',
       method: 'get',
       params      // 请求参数
     })
@@ -185,7 +185,7 @@ export default {
    */
   getRouteList(params) {
     return request({
-      url: '/api/sys/route/selectRouteList',
+      url: '/api/sys/route/selectRouteTree',
       method: 'get',
       params      // 请求参数
     })

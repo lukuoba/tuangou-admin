@@ -82,7 +82,6 @@ const formatLabel = (item) => {
 
 // 选择项变化处理
 const handleSelectChange = (value) => {
-  console.log("是否粗发函数", 1212112);
   emit("update:modelValue", value);
   const selectedItem = options.value.find((item) => item.id === value);
   emit("change", { id: value, item: selectedItem });

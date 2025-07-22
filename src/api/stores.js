@@ -82,5 +82,45 @@ export default {
       method: 'put',    // 请求方式
       data      // 请求参数
     })
-  }
+  },
+  // 添加商品
+  addProduct(data) {
+    return request({
+      url: `/api/pds/product/addProduct`,  // 接口路径
+      method: 'post',    // 请求方式
+      data      // 请求参数
+    })
+  },
+  // 删除商品
+  deleteProduct(data) {
+    return request({
+      url: `/api/pds/product/deleteProduct`,  // 接口路径
+      method: 'delete',    // 请求方式
+      data
+    })
+  },
+  // 查询商品列表
+  getProductList(params) {
+    return request({
+      url: `/api/pds/product/selectProductList`,  // 接口路径
+      method: 'get',    // 请求方式
+      params      // 请求参数
+    })
+  },
+  // 更新商品
+  updateProduct(data) {
+    return request({
+      url: `/api/pds/product/updateProduct`,  // 接口路径
+      method: 'put',    // 请求方式
+      data      // 请求参数
+    })
+  },
+  // 更新商品状态
+  updateProductStatus(data) {
+    return request({
+      url: `/api/pds/product/updateProductStatus`,  // 接口路径
+      method: 'put',    // 请求方式
+      data      // 请求参数
+    })
+  },
 }

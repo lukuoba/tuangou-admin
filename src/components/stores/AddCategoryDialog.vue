@@ -142,7 +142,7 @@ const openDialog = () => {
   if (editId) {
     form.value = {
       ...editData, 
-      category_picture: editData.category_picture ? [editData.category_picture] :  []
+      // category_picture: editData.category_picture ? [editData.category_picture] :  []
     }; // 使用解构赋值创建新对象，避免引用问题
   } else {
     form.value = {
@@ -170,7 +170,7 @@ const handleSubmit = () => {
       console.log("表单数据", form.value);
       emit("addaccount", {
         ...form.value,
-        category_picture: form.value.category_picture[0],
+        // category_picture: form.value.category_picture[0],
       }); // 触发父组件的 addaccount 方法
       handleClose(); // 关闭弹窗
     } else {

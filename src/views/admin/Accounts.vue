@@ -141,12 +141,6 @@ const handleEdit = (row) => {
 // 处理新增/编辑账号逻辑
 const handleAddAccount = async (formData) => {
   try {
-    const isEdit = !!formData.id;
-    formData.user_avatar =
-      typeof formData.user_avatar == "object"
-        ? formData.user_avatar[0]
-        : formData.user_avatar;
-    console.log("formData", formData, typeof formData.user_avatar);
     await (isEdit ? _http.editCounts(formData) : _http.addCounts(formData));
 
     ElMessage.success(isEdit ? "编辑成功" : "新增成功");
