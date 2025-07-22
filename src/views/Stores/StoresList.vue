@@ -140,7 +140,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import AddOrEditStrores from "@/components/stores/AddOrEditStrores.vue";
 import SmartTable from "@/components/SmartTable.vue";
 import _http from "@/api/stores.js";
-import { useRouter  } from "vue-router";
+import { useRouter } from "vue-router";
 const router = useRouter();
 const addEditDialog = ref(null);
 const dialogTitle = ref("");
@@ -261,9 +261,9 @@ const handleStatusChange = async (row) => {
     row.statusLoading = false; // 关闭加载状态
   }
 };
-const openProduct = (id)=>{
-  console.log(id)
-  console.log('router.push:', router.push); 
+const openProduct = (id) => {
+  console.log(id);
+  console.log("router.push:", router.push);
   router.push({
     path: "/stores/add-product",
     query: {
@@ -271,7 +271,7 @@ const openProduct = (id)=>{
     },
   });
   // window.open(`http://127.0.0.6:5173/#/products?store_id=${id}`)
-}
+};
 </script>
 <style scoped>
 .add-button {

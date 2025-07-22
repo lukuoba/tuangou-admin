@@ -52,7 +52,7 @@ export default {
       data      // 请求参数
     })
   },
-//   获取门店列表
+  //   获取门店列表
   getStoresList(params) {
     return request({
       url: '/api/sts/store/selectStoreList',  // 接口路径
@@ -94,9 +94,8 @@ export default {
   // 删除商品
   deleteProduct(data) {
     return request({
-      url: `/api/pds/product/deleteProduct`,  // 接口路径
-      method: 'delete',    // 请求方式
-      data
+      url: `/api/pds/product/deleteProduct?ids=${[data]}`,  // 接口路径
+      method: 'delete',
     })
   },
   // 查询商品列表
@@ -123,4 +122,12 @@ export default {
       data      // 请求参数
     })
   },
+  // 查询店铺详情
+  getProductDetail(id) {
+    return request({
+      url: `/api/pds/product/selectProductInfo?id=${id}`,  // 接口路径
+      method: 'get',    // 请求方式
+    })
+  },
+
 }

@@ -199,7 +199,7 @@
 </template>
 <script setup>
 import PictureUpload from "@/components/PictureUploadNew.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted,nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import cloneDeep from "lodash/cloneDeep";
 import { useRoute, useRouter } from "vue-router";
@@ -241,6 +241,33 @@ const isSubmitting = ref(false);
 const formRef = ref(null);
 const categoryList = ref([]);
 const storeId = ref(null);
+const productId = ref(null);
+
+const extractFormData = (detailData) => {
+  return {
+    product_name: detailData.product_name,
+    show_picture: detailData.show_picture,
+    main_picture: detailData.main_picture,
+    detail_picture: detailData.detail_picture,
+    product_status: detailData.product_status,
+    sort_no: detailData.sort_no,
+    stock: detailData.stock,
+    retail_price: detailData.retail_price,
+    total_sales: detailData.total_sales,
+    remark: detailData.remark,
+    is_single_spec: detailData.is_single_spec,
+    category_id: detailData.category_id,
+    spec_list: detailData.spec_list.map(specGroup => ({
+      spec_name: specGroup.spec_name,
+      spec_value_list: specGroup.spec_value_list.map(specValue => ({
+        spec_name: specValue.spec_name,
+        price: specValue.price,
+        spec_picture: specValue.spec_picture,
+        stock: specValue.stock
+      }))
+    }))
+  };
+};
 // 添加规格组
 const addSpecGroup = () => {
   form.value.spec_list.push({
@@ -332,7 +359,11 @@ const handleSubmit = async () => {
     // 触发表单校验
     await formRef.value.validate();
     // 调用 addProduct 接口
-    const response = await _http.addProduct(submitData);
+    if (productId.value) {
+      submitData.id = productId.value;
+    }
+    const response = productId.value ? await _http.updateProduct(submitData) : await _http.addProduct(submitData);
+
     console.log(response, "response", typeof response);
     if (typeof response === "object") {
       // 假设成功状态码为 200
@@ -362,9 +393,35 @@ const handleSubmit = async () => {
 const handlePreview = () => {
   console.log("from", form.value);
 };
-onMounted(() => {
+
+const getProductDetail = async (id) => {
+  try {
+    const data = await _http.getProductDetail(id);
+    console.log(data, "data");
+
+    if (data && typeof data === "object") {
+      // 提取符合 initialForm 结构的数据
+      const formData = extractFormData(data);
+      // 使用 cloneDeep 深拷贝数据到 form
+      nextTick(() => {
+        form.value = cloneDeep(formData);
+      })
+      // 重新初始化表单验证
+      if (formRef.value) {
+        await formRef.value.clearValidate(); // 清空所有校验信息
+        formRef.value.resetFields(); // 重置表单字段
+      }
+    }
+  } catch (error) {
+    ElMessage.error("获取商品详情失败");
+    console.error("获取商品详情出错:", error);
+  }
+};
+
+onMounted(async () => {
   // 从 URL 查询参数中获取 store_id
   const urlStoreId = Number(route.query.store_id);
+  const urlProductId = Number(route.query.id);
   if (urlStoreId) {
     storeId.value = urlStoreId;
   } else {
@@ -385,6 +442,10 @@ onMounted(() => {
         storeId.value = userMessage.store_id;
       }
     }
+  }
+  if (urlProductId) {
+    productId.value = urlProductId;
+    getProductDetail(urlProductId);
   }
 
   // 初始化搜索参数（如果需要）
