@@ -6,55 +6,32 @@
     :before-close="handleClose"
   >
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
-      <el-form-item label="商品类别" prop="category_name">
-        <el-input v-model="form.category_name" />
-      </el-form-item>
-      <el-form-item label="分类级别" prop="category_level">
-        <el-select
-          v-model="form.category_level"
-          placeholder="请选择类别"
-          class="search-input"
-        >
-          <el-option label="首级" :value="0" />
-          <el-option label="二级" :value="1" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="父级ID" prop="parent_id">
-        <el-select
-          v-model="form.parent_id"
-          placeholder="请选择类别"
-          class="search-input"
-        >
-          <el-option
-            v-for="item in parentList"
-            :key="item.id"
-            :label="item.category_name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="序列" prop="sort_no">
-        <el-input-number
-          v-model="form.sort_no"
-          placeholder="请输入序列号"
-          class="search-input"
+      <el-form-item label="图片" prop="picture_url">
+        <PictureUpload
+          v-model="form.picture_url"
+          :max-count="1"
+          list-type="picture-card"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="category_status">
+      <el-form-item label="跳转路径" prop="skip_path">
+        <el-input v-model="form.skip_path" />
+      </el-form-item>
+      <el-form-item label="是否展示" prop="is_show_carousel">
         <el-select
-          v-model="form.category_status"
-          placeholder="请选择状态"
+          v-model="form.is_show_carousel"
+          placeholder="请选择"
           class="search-input"
         >
           <el-option label="启用" :value="1" />
           <el-option label="禁用" :value="0" />
         </el-select>
       </el-form-item>
-      <el-form-item label="类别照片">
-        <PictureUpload
-          v-model="form.category_picture"
-          :max-count="1"
-          list-type="picture-card"
+
+      <el-form-item label="序列" prop="sort_no">
+        <el-input-number
+          v-model="form.sort_no"
+          placeholder="请输入序列号"
+          class="search-input"
         />
       </el-form-item>
       <el-form-item label="备注">
@@ -72,7 +49,7 @@
 <script setup>
 import PictureUpload from "@/components/PictureUploadNew.vue";
 import { ref } from "vue";
-import  _http from "@/api/stores";
+import _http from "@/api/stores";
 // 弹窗显示状态
 const dialogVisible = ref(false);
 
@@ -93,66 +70,42 @@ const { title, editId, editData } = defineProps({
 
 // 表单数据
 const form = ref({
-  category_name: "",
-  parent_id: 0, // 父级0
+  picture_url: [],
   remark: "",
-  category_level: 0, // 首级0
   sort_no: 1,
-  category_status: 1,
-  category_picture: [],
+  skip_path: "",
+  is_show_carousel: 1,
 });
+
 
 // 表单校验规则
 const rules = {
-  category_name: [
-    { required: true, message: "请输入商品类别", trigger: "blur" }, 
-  ],
-  category_level: [
-    { required: true, message: "请选择数据权限", trigger: "change" },
-  ],
-  category_status: [
-    { required: true, message: "请选择状态", trigger: "change" },
-  ],
+  picture_url: [{ required: true, message: "请上传图片", trigger: "change" }],
+  skip_path: [{ required: true, message: "请输入跳转路径", trigger: "change" }],
+  is_show_carousel: [{ required: true, message: "请选择是否展示", trigger: "change" }],
   sort_no: [{ required: true, message: "请输入序列", trigger: "change" }],
-  parent_id: [{ required: true, message: "请选择父级", trigger: "change" }],
 };
 
 // 表单引用
 const formRef = ref(null);
-const parentList = ref([]);
 // 定义 emit
 const emit = defineEmits(["addaccount"]);
 
 // 打开弹窗
 const openDialog = () => {
   dialogVisible.value = true;
-  _http.getCategoryList().then((res) => {
-    if (res.list) {
-      parentList.value = res.list.map(item => ({
-        id: item.id,
-        category_name: item.category_name
-      }));
-      parentList.value.push({ id: 0, category_name: '父级' });
-      console.log("parentId", parentList);
-    }
-  });
-
-  console.log({editData})
-
   if (editId) {
     form.value = {
-      ...editData, 
+      ...editData,
       // category_picture: editData.category_picture ? [editData.category_picture] :  []
     }; // 使用解构赋值创建新对象，避免引用问题
   } else {
     form.value = {
-      category_name: "",
-      parent_id: 0, // 父级0
+      picture_url: [],
       remark: "",
-      category_level: 0, // 首级0
       sort_no: 1,
-      category_status: 1,
-      category_picture: [],
+      skip_path: "",
+      is_show_carousel: 1,
     };
   }
 };

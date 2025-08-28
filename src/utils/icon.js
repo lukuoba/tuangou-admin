@@ -11,7 +11,9 @@ import {
     OfficeBuilding,
     Film,
     Goods,
-    Handbag
+    Handbag,
+    Apple,
+    MagicStick
 } from "@element-plus/icons-vue";
 // 图标映射
 const iconMap = {
@@ -27,7 +29,9 @@ const iconMap = {
     OfficeBuilding: OfficeBuilding,
     Film: Film,
     Goods:Goods,
-    Handbag:Handbag
+    Handbag:Handbag,
+    Apple:Apple,
+    MagicStick:MagicStick
 };
 export {
     iconMap

@@ -2,7 +2,7 @@
   <div>
     <p class="add-button">
       <el-button type="primary" @click="openAddCategoryDialog"
-        >新增店类</el-button
+        >新增品类</el-button
       >
     </p>
     <AddCategoryDialog
@@ -11,10 +11,10 @@
       :title="dialogTitle"
       :editId="dialogId"
       :editData="dialogData"
-    />
+    /> 
     <div>
       <TreeTable :data="tableData" :loading="loading" :showSearch="false">
-        <el-table-column label="门店类型" prop="category_name" />
+        <el-table-column label="商品类型" prop="category_name" />
         <el-table-column label="状态">
           <template #default="scope">
             <el-tag

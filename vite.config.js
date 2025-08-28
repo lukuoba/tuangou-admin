@@ -24,7 +24,7 @@ export default defineConfig(({ command, mode }) => {
       open: true, // 自动打开浏览器
       proxy: {
         '/api': {
-          target: 'http://taoyity.cn:6000/v1',
+          target: 'https://taoyity.cn:38452/v1',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api/, ''),
           configure: (proxy, options) => {
@@ -34,7 +34,7 @@ export default defineConfig(({ command, mode }) => {
               if (token) {
                 proxyReq.setHeader('Token', token);
               }
-            });
+            }); 
           }
         },
         '/oss-proxy': {
