@@ -33,7 +33,7 @@
             <span v-else>-</span>
           </template>
         </el-table-column>
-        <el-table-column prop="menu_status" label="状态">
+        <!-- <el-table-column prop="menu_status" label="状态">
           <template #default="{ row }">
             <el-switch
               v-model="row.menu_status"
@@ -44,7 +44,7 @@
               @change="handleStatusChange(row)"
             />
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column prop="created_by" label="创建人" width="100" />
         <el-table-column prop="created_at" label="创建时间" width="180" />
         <el-table-column prop="updated_by" label="更新人" width="100" />
@@ -179,24 +179,24 @@ const handleDelete = async (id) => {
   }
 };
 
-// 处理状态变更
-const handleStatusChange = async (row) => {
-  row.statusLoading = true; // 开启加载状态
-  try {
-    // 调用修改状态接口
-    const response = await _http.updateMenuStatus({
-      ids: [row.id],
-      menu_status: row.menu_status,
-    });
-    ElMessage.success(response.message || "状态更新成功");
-  } catch (error) {
-    // 状态变更失败，恢复原状态
-    row.menu_status = row.menu_status === 1 ? 0 : 1;
-    ElMessage.error(error.message || "状态更新失败");
-  } finally {
-    row.statusLoading = false; // 关闭加载状态
-  }
-};
+// // 处理状态变更
+// const handleStatusChange = async (row) => {
+//   row.statusLoading = true; // 开启加载状态
+//   try {
+//     // 调用修改状态接口
+//     const response = await _http.updateMenuStatus({
+//       ids: [row.id],
+//       menu_status: row.menu_status,
+//     });
+//     ElMessage.success(response.message || "状态更新成功");
+//   } catch (error) {
+//     // 状态变更失败，恢复原状态
+//     row.menu_status = row.menu_status === 1 ? 0 : 1;
+//     ElMessage.error(error.message || "状态更新失败");
+//   } finally {
+//     row.statusLoading = false; // 关闭加载状态
+//   }
+// };
 </script>
 <style scoped>
 .add-button {

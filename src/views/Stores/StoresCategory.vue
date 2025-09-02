@@ -157,4 +157,4 @@ onMounted(() => {
 .search-input {
   width: 192px;
 }
-</style>
+</style>      

@@ -54,7 +54,7 @@
       <template #table-column>
         <el-table-column label="用户名" prop="user_name" />
         <el-table-column label="手机号" prop="phone" />
-        <el-table-column label="状态">
+        <!-- <el-table-column label="状态">
           <template #default="{ row }">
             <el-switch
               v-model="row.user_status"
@@ -65,7 +65,7 @@
               @change="handleStatusChange(row)"
             />
           </template>
-        </el-table-column>
+        </el-table-column> -->
         <el-table-column label="角色" prop="role_name" />
         <el-table-column label="用户头像">
           <template #default="{ row }">
@@ -198,23 +198,23 @@ const handlePaginationChange = (params) => {
   fetchUserList();
 };
 // 处理状态变更
-const handleStatusChange = async (row) => {
-  row.statusLoading = true; // 开启加载状态
-  try {
-    // 调用修改状态接口
-    const response = await _http.updateUserStatus({
-      ids: [row.id],
-      user_status: row.user_status,
-    });
-    ElMessage.success(response.message || "状态更新成功");
-  } catch (error) {
-    // 状态变更失败，恢复原状态
-    row.user_status = row.user_status === 1 ? 0 : 1;
-    ElMessage.error(error.message || "状态更新失败");
-  } finally {
-    row.statusLoading = false; // 关闭加载状态
-  }
-};
+// const handleStatusChange = async (row) => {
+//   row.statusLoading = true; // 开启加载状态
+//   try {
+//     // 调用修改状态接口
+//     const response = await _http.updateUserStatus({
+//       ids: [row.id],
+//       user_status: row.user_status,
+//     });
+//     ElMessage.success(response.message || "状态更新成功");
+//   } catch (error) {
+//     // 状态变更失败，恢复原状态
+//     row.user_status = row.user_status === 1 ? 0 : 1;
+//     ElMessage.error(error.message || "状态更新失败");
+//   } finally {
+//     row.statusLoading = false; // 关闭加载状态
+//   }
+// };
 </script>
 
 <style scoped>

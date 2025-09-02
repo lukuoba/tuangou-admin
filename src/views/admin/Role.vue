@@ -58,7 +58,7 @@
         <template #table-column>
           <el-table-column label="角色名称" prop="role_name" />
           <el-table-column label="角色标识" prop="role_key" />
-          <el-table-column label="状态">
+          <!-- <el-table-column label="状态">
             <template #default="{ row }">
               <el-switch
                 v-model="row.role_status"
@@ -69,7 +69,7 @@
                 @change="handleStatusChange(row)"
               />
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="数据权限">
             <template #default="scope">
               {{ getText(scope.row.data_scope) }}
@@ -210,24 +210,24 @@ const handlePaginationChange = (params) => {
   searchParams.value = { ...searchParams.value, ...params };
   fetchUserList();
 };
-// 处理状态变更
-const handleStatusChange = async (row) => {
-  row.statusLoading = true; // 开启加载状态
-  try {
-    // 调用修改状态接口
-    const response = await _http.updateRoleStatus({
-      ids: [row.id],
-      role_status: row.role_status,
-    });
-    ElMessage.success(response.message || "状态更新成功");
-  } catch (error) {
-    // 状态变更失败，恢复原状态
-    row.role_status = row.role_status === 1 ? 0 : 1;
-    ElMessage.error(error.message || "状态更新失败");
-  } finally {
-    row.statusLoading = false; // 关闭加载状态
-  }
-};
+// // 处理状态变更
+// const handleStatusChange = async (row) => {
+//   row.statusLoading = true; // 开启加载状态
+//   try {
+//     // 调用修改状态接口
+//     const response = await _http.updateRoleStatus({
+//       ids: [row.id],
+//       role_status: row.role_status,
+//     });
+//     ElMessage.success(response.message || "状态更新成功");
+//   } catch (error) {
+//     // 状态变更失败，恢复原状态
+//     row.role_status = row.role_status === 1 ? 0 : 1;
+//     ElMessage.error(error.message || "状态更新失败");
+//   } finally {
+//     row.statusLoading = false; // 关闭加载状态
+//   }
+// };
 </script>
 
 <style scoped>
