@@ -5,7 +5,7 @@ export default {
   // 添加菜单
   addMune(data) {
     return request({
-      url: '/api/sys/menu/addMenu',
+      url: '/api/menu/addMenu',
       method: 'post',
       data      // 请求参数
     })
@@ -13,7 +13,7 @@ export default {
   //   查询菜单列表
   getMenuList(params) {
     return request({
-      url: '/api/sys/menu/selectMenuTree',
+      url: '/api/menu/queryMenuTree',
       method: 'get',
       params      // 请求参数
     })
@@ -21,7 +21,7 @@ export default {
   // 编辑菜单列表
   editMenu(data) {
     return request({
-      url: '/api/sys/menu/updateMenu',
+      url: '/api/menu/updateMenu',
       method: 'put',
       data      // 请求参数
     })
@@ -29,14 +29,14 @@ export default {
   // 删除菜单
   deleteMenu(id) {
     return request({
-      url: `/api/sys/menu/deleteMenu?ids=${[id]}`,
+      url: `/api/menu/deleteMenu?ids=${[id]}`,
       method: 'delete',
     })
   },
   // 更新菜单状态
   updateMenuStatus(data) {
     return request({
-      url: '/api/sys/menu/updateMenuStatus',
+      url: '/api/menu/updateMenuStatus',
       method: 'put',
       data      // 请求参数
     })
@@ -51,7 +51,7 @@ export default {
   // 查询登录日志列表
   getLoginLogList(params) {
     return request({
-      url: '/api/sys/loginLog/selectLoginLogList',
+      url: '/api/loginLog/selectLoginLogList',
       method: 'get',
       params      // 请求参数
     })
@@ -59,7 +59,7 @@ export default {
   // 查询登录日志详情
   getLoginLogDetail(id) {
     return request({
-      url: `/api/sys/loginLog/selectLoginLogInfo`,
+      url: `/api/loginLog/selectLoginLogInfo`,
       method: 'get',
       params: {
         id
@@ -69,7 +69,7 @@ export default {
   // 删除登录日志
   deleteLoginLog(id) {
     return request({
-      url: `/api/sys/loginLog/deleteLoginLog`,
+      url: `/api/loginLog/deleteLoginLog`,
       method: 'delete',
       params: { ids: id }
     })
@@ -77,7 +77,7 @@ export default {
   // 查询操作日志列表
   getOperationLogList(params) {
     return request({
-      url: '/api/sys/operateLog/selectOperateLogList',
+      url: '/api/operateLog/selectOperateLogList',
       method: 'get',
       params      // 请求参数
     })
@@ -85,7 +85,7 @@ export default {
   // 查询操作日志详情
   getOperationLogDetail(id) {
     return request({
-      url: `/api/sys/operateLog/selectOperateLogInfo`,
+      url: `/api/operateLog/selectOperateLogInfo`,
       method: 'get',
       params: {
         id
@@ -95,7 +95,7 @@ export default {
   // 删除操作日志
   deleteOperationLog(id) {
     return request({
-      url: `/api/sys/operateLog/deleteOperateLog`,
+      url: `/api/operateLog/deleteOperateLog`,
       method: 'delete',
       params: { ids: id }
     })
@@ -109,7 +109,7 @@ export default {
   // 添加角色
   addRole(data) {
     return request({
-      url: '/api/sys/role/addRole',
+      url: '/api/role/addRole',
       method: 'post',
       data      // 请求参数
     })
@@ -117,7 +117,7 @@ export default {
   // 查询角色列表
   getRoleList(params) {
     return request({
-      url: '/api/sys/role/selectRoleList',
+      url: '/api/role/selectRoleList',
       method: 'get',
       params      // 请求参数
     })
@@ -125,7 +125,7 @@ export default {
   // 删除角色
   deleteRole(id) {
     return request({
-      url: `/api/sys/role/deleteRole`,
+      url: `/api/role/deleteRole`,
       method: 'delete',
       params: { ids: id }
     })
@@ -133,7 +133,7 @@ export default {
   // 编辑角色
   editRole(data) {
     return request({
-      url: '/api/sys/role/updateRole',
+      url: '/api/role/updateRole',
       method: 'put',
       data      // 请求参数
     })
@@ -141,7 +141,7 @@ export default {
   // 查询角色详情
   detailRole(id) {
     return request({
-      url: `/api/sys/role/selectRoleInfo`,
+      url: `/api/role/selectRoleInfo`,
       method: 'get',
       params: {
         id
@@ -151,7 +151,7 @@ export default {
   // 更新角色状态
   updateRoleStatus(data) {
     return request({
-      url: `api/sys/role/updateRoleStatus`,
+      url: `api/role/updateRoleStatus`,
       method: 'put',
       data
     })
@@ -159,7 +159,7 @@ export default {
   // 查询角色与菜单关联
   getRoleMenuList(id) {
     return request({
-      url: `/api/sys/role/selectRoleMenuList`,
+      url: `/api/role/selectRoleMenuList`,
       method: 'get',
       params: {
         role_id: id
@@ -169,7 +169,7 @@ export default {
   // 更新角色菜单
   updateRoleMenu(data) {
     return request({
-      url: `/api/sys/role/updateRoleMenuList`,
+      url: `/api/role/updateRoleMenuList`,
       method: 'put',
       data
     })
@@ -185,7 +185,7 @@ export default {
    */
   getRouteList(params) {
     return request({
-      url: '/api/sys/route/selectRouteTree',
+      url: '/api/route/selectRouteTree',
       method: 'get',
       params      // 请求参数
     })
@@ -193,7 +193,7 @@ export default {
   // 查询路由详情
   detailRoute(id) {
     return request({
-      url: `/api/sys/route/selectRouteInfo`,
+      url: `/api/route/selectRouteInfo`,
       method: 'get',
       params: {
         id
@@ -203,7 +203,7 @@ export default {
   // 添加路由
   addRoute(data) {
     return request({
-      url: '/api/sys/route/addRoute',
+      url: '/api/route/addRoute',
       method: 'post',
       data      // 请求参数
     })
@@ -211,7 +211,7 @@ export default {
   // 编辑路由
   editRoute(data) {
     return request({
-      url: '/api/sys/route/updateRoute',
+      url: '/api/route/updateRoute',
       method: 'put',
       data      // 请求参数
     })
@@ -219,7 +219,7 @@ export default {
   // 删除路由
   deleteRoute(id) {
     return request({
-      url: `/api/sys/route/deleteRoute`,
+      url: `/api/route/deleteRoute`,
       method: 'delete',
       params: { ids: id }
     })
@@ -227,7 +227,7 @@ export default {
   // 更新路由状态
   updateRouteStatus(id, status) {
     return request({
-      url: `api/sys/route/updateRouteStatus`,
+      url: `api/route/updateRouteStatus`,
       method: 'put',
       params: {
         ids: [id],

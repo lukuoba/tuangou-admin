@@ -40,6 +40,19 @@
           <el-option label="禁用" :value="0" />
         </el-select>
       </el-form-item>
+      <el-form-item label="分类">
+        <el-select
+          v-model="searchForm.category_id"
+          placeholder="请选择分类"
+          class="search-input"
+        >
+          <el-option
+            v-for="item in category_list"
+            :label="item.category_name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" native-type="submit">搜索</el-button>
       </el-form-item>
@@ -118,6 +131,7 @@ const searchForm = reactive({
   product_status: null,
   is_single_spec: null,
   product_name: null,
+  category_id: null,
 });
 const showStore = ref(false);
 const smartTableRef = ref(null);
@@ -126,6 +140,7 @@ const totalAccounts = ref(0);
 const isLoading = ref(false);
 const searchParams = ref({});
 const store_list = ref([]);
+const category_list = ref([]);
 
 // 初始化时触发请求
 onMounted(async () => {

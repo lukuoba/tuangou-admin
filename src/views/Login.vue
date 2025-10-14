@@ -167,9 +167,9 @@ const handleAccountLogin = async () => {
     localStorage.setItem("UserMessage", JSON.stringify(loginRes));
     // 2. 获取菜单
     const menuRes = await Http_s.getMenuList();
-    const menuData = menuRes.list;
+    // const menuData = menuRes;
     // 存储菜单数据到localStorage
-    localStorage.setItem("menuData", JSON.stringify(menuData));
+    localStorage.setItem("menuData", JSON.stringify(menuRes));
 
     // 3. 初始化动态路由
     const success = await initDynamicRoutes();

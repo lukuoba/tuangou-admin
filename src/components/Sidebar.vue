@@ -59,10 +59,11 @@ const menuList = ref([]);
 
 // 过滤隐藏的菜单项
 const filteredMenuList = computed(() => {
+  console.log('menuListsdfsad ', menuList.value)
   return menuList.value.filter(
     (item) =>
       item.is_hide_menu === 0 &&
-      (item.children_list
+      (item.children_list.length
         ? item.children_list.some((child) => child.is_hide_menu === 0)
         : true)
   );

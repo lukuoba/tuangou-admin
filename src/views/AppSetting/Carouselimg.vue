@@ -132,6 +132,12 @@ onMounted(() => {
 // 请求方法（由父组件实现）
 const fetchUserList = async () => {
   isLoading.value = true;
+  console.log('searchParams.value', searchParams.value)
+  searchParams.value = {
+    ...searchParams.value,
+    page_num: searchParams.value.page_num || 1,
+    page_size: searchParams.value.page_size || 10,
+  }
   try {
     const res = await _http.getCarouselimgList(searchParams.value);
     accountsData.value = res.list;

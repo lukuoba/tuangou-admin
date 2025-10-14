@@ -11,9 +11,17 @@
       :title="dialogTitle"
       :editId="dialogId"
       :editData="dialogData"
-    /> 
+    />
     <div>
-      <TreeTable :data="tableData" :loading="loading" :showSearch="false">
+      <SmartTable
+        ref="smartTableRef"
+        title="角色列表"
+        :tableData="tableData"
+        :total="tableTotal"
+        :loading="isLoading"
+        :requestParams="searchParams"
+        @pagination-change="handlePaginationChange"
+      >
         <el-table-column label="商品类型" prop="category_name" />
         <el-table-column label="状态">
           <template #default="scope">
@@ -24,9 +32,9 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="数据权限">
+        <el-table-column label="图片">
           <template #default="scope">
-            {{ getText(scope.row.data_scope) }}
+            <img :src="scope.row.category_picture" alt="图片" style="width: 50px; height: 50px;">
           </template>
         </el-table-column>
         <el-table-column label="创建者" prop="created_by" />
@@ -35,7 +43,7 @@
         <el-table-column label="备注" prop="remark" />
         <el-table-column label="操作">
           <template #default="scope">
-            <el-button link type="primary"  @click="handleEdit(scope.row)"
+            <el-button link type="primary" @click="handleEdit(scope.row)"
               >编辑</el-button
             >
             <el-button link type="primary" @click="handleDelete(scope.row.id)"
@@ -43,7 +51,7 @@
             >
           </template>
         </el-table-column>
-      </TreeTable>
+      </SmartTable>
     </div>
   </div>
 </template>
@@ -52,7 +60,7 @@
 import { ref, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import AddCategoryDialog from "@/components/stores/AddCategoryDialog.vue";
-import TreeTable from "@/components/TreeTable.vue";
+import SmartTable from "@/components/SmartTable.vue";
 import _http from "@/api/stores";
 
 const addCategoryDialog = ref(null);
@@ -60,6 +68,7 @@ const dialogTitle = ref("");
 const dialogId = ref(null);
 const dialogData = ref({});
 const tableData = ref([]);
+const tableTotal = ref(0);  
 const loading = ref(false);
 const searchParams = ref({});
 
@@ -114,11 +123,16 @@ const getText = (role) => {
 };
 // 请求方法（由父组件实现）
 const loadData = async () => {
+  searchParams.value = {
+    page: 1,
+    page_size: 10,
+  };
   loading.value = true;
   try {
     const res = await _http.getCategoryList(searchParams.value);
     console.log(res);
     tableData.value = res.list;
+    tableTotal.value = res.total;
   } catch (error) {
     console.error("获取用户列表失败:", error);
   } finally {
@@ -157,4 +171,4 @@ onMounted(() => {
 .search-input {
   width: 192px;
 }
-</style>      
+</style>

@@ -19,7 +19,7 @@ export default {
     // 获取轮播图列表
     getCarouselimgList(params) {
         return request({
-            url: '/api/mks/carousel/selectCarouselList',
+            url: '/api/carousel/queryCarouselList',
             method: 'get',
             params
         })

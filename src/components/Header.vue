@@ -32,9 +32,10 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
 const isCollapse = ref(false)
 const handleProfile = () => {
   console.log("跳转到个人中心");

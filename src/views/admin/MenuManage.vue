@@ -100,7 +100,7 @@ const loadData = async () => {
   try {
     loading.value = true;
     const response = await _http.getMenuList();
-    tableData.value = response.list || [];
+    tableData.value = response || [];
     console.log("加载数据成功:", tableData.value);
   } catch (error) {
     console.error("加载数据失败:", error);
