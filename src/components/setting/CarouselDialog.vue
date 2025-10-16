@@ -13,8 +13,14 @@
           list-type="picture-card"
         />
       </el-form-item>
-      <el-form-item label="跳转路径" prop="skip_path">
-        <el-input v-model="form.skip_path" />
+      <el-form-item label="跳转商品" prop="skip_id">
+        <el-select
+          v-model="form.skip_id"
+          placeholder="请选择跳转商品"
+          class="search-input"
+        >
+          <el-option v-for="item in product_list" :key="item.id" :label="item.product_name" :value="item.id" />
+        </el-select>
       </el-form-item>
       <el-form-item label="是否展示" prop="is_show_carousel">
         <el-select
@@ -37,7 +43,7 @@
       <el-form-item label="备注">
         <el-input v-model="form.remark" />
       </el-form-item>
-    </el-form>
+    </el-form> 
 
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
@@ -67,13 +73,13 @@ const { title, editId, editData } = defineProps({
     default: undefined,
   },
 });
-
+const product_list = ref([])
 // 表单数据
 const form = ref({
   picture_url: [],
   remark: "",
   sort_no: 1,
-  skip_path: "",
+  skip_id: "",
   is_show_carousel: 1,
 });
 
@@ -81,7 +87,7 @@ const form = ref({
 // 表单校验规则
 const rules = {
   picture_url: [{ required: true, message: "请上传图片", trigger: "change" }],
-  skip_path: [{ required: true, message: "请输入跳转路径", trigger: "change" }],
+  skip_id: [{ required: true, message: "请输入跳转商品", trigger: "change" }],
   is_show_carousel: [{ required: true, message: "请选择是否展示", trigger: "change" }],
   sort_no: [{ required: true, message: "请输入序列", trigger: "change" }],
 };
@@ -94,6 +100,15 @@ const emit = defineEmits(["addaccount"]);
 // 打开弹窗
 const openDialog = () => {
   dialogVisible.value = true;
+  let data = {
+    page_num: 1,
+    page_size: 50,
+  }
+  _http.getProductList(data).then((respose) => {
+    console.log('获取商品列表',respose.list)
+    product_list.value = respose.list
+  })
+  
   if (editId) {
     form.value = {
       ...editData,

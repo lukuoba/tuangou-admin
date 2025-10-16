@@ -28,7 +28,7 @@
           <el-form-item label="手机号码" prop="phone">
             <el-input v-model="form.phone" placeholder="请输入手机号码" />
           </el-form-item>
-          <el-form-item label="分类" prop="category_id">
+          <!-- <el-form-item label="分类" prop="category_id">
             <el-select v-model="form.category_id" placeholder="请选择分类">
               <el-option
                 v-for="item in categoryList"
@@ -37,7 +37,7 @@
                 :value="item.id"
               />
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
 
           <!-- 状态下拉选择框 -->
           <el-form-item label="状态" prop="store_status">

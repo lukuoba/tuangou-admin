@@ -32,8 +32,13 @@
               list-type="picture-card"
             />
           </el-form-item>
-          <el-form-item label="分类" prop="category_id">
-            <el-select v-model="form.category_id" placeholder="请选择分类">
+          <el-form-item label="分类" prop="category_ids">
+            <el-select
+              v-model="form.category_ids"
+              multiple
+              placeholder="请选择分类"
+              collapse-tags
+            >
               <el-option
                 v-for="item in categoryList"
                 :key="item.id"
@@ -70,10 +75,13 @@
               class="search-input"
             />
           </el-form-item>
-          <el-form-item label="状态" prop="product_status">
-            <el-select v-model="form.product_status" placeholder="请选择状态">
-              <el-option label="启用" :value="1" />
-              <el-option label="禁用" :value="0" />
+          <el-form-item label="状态" prop="is_publish_product">
+            <el-select
+              v-model="form.is_publish_product"
+              placeholder="请选择状态"
+            >
+              <el-option label="上架" :value="1" />
+              <el-option label="下架" :value="0" />
             </el-select>
           </el-form-item>
           <el-form-item label="是否为单规格">
@@ -199,7 +207,7 @@
 </template>
 <script setup>
 import PictureUpload from "@/components/PictureUploadNew.vue";
-import { ref, onMounted,nextTick } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import cloneDeep from "lodash/cloneDeep";
 import { useRoute, useRouter } from "vue-router";
@@ -213,14 +221,14 @@ const initialForm = {
   show_picture: [],
   main_picture: [],
   detail_picture: [],
-  product_status: null,
+  is_publish_product: null,
   sort_no: 1,
   stock: 1,
   retail_price: 1,
   total_sales: 1,
   remark: "",
   is_single_spec: 1,
-  category_id: null,
+  category_ids: [],
   spec_list: [
     {
       spec_name: "",
@@ -249,23 +257,23 @@ const extractFormData = (detailData) => {
     show_picture: detailData.show_picture,
     main_picture: detailData.main_picture,
     detail_picture: detailData.detail_picture,
-    product_status: detailData.product_status,
+    is_publish_product: detailData.is_publish_product,
     sort_no: detailData.sort_no,
     stock: detailData.stock,
     retail_price: detailData.retail_price,
     total_sales: detailData.total_sales,
     remark: detailData.remark,
     is_single_spec: detailData.is_single_spec,
-    category_id: detailData.category_id,
-    spec_list: detailData.spec_list.map(specGroup => ({
+    category_ids: detailData.category_ids,
+    spec_list: detailData.spec_list.map((specGroup) => ({
       spec_name: specGroup.spec_name,
-      spec_value_list: specGroup.spec_value_list.map(specValue => ({
+      spec_value_list: specGroup.spec_value_list.map((specValue) => ({
         spec_name: specValue.spec_name,
         price: specValue.price,
         spec_picture: specValue.spec_picture,
-        stock: specValue.stock
-      }))
-    }))
+        stock: specValue.stock,
+      })),
+    })),
   };
 };
 // 添加规格组
@@ -285,8 +293,8 @@ const addSpecGroup = () => {
 const getAllCategory = async () => {
   const data = await _http.getAllCategory();
   console.log("分类", data);
-  if (data.list) {
-    categoryList.value = data.list;
+  if (data) {
+    categoryList.value = data;
   }
 };
 // 删除规格组
@@ -323,12 +331,23 @@ const rules = {
   detail_picture: [
     { required: true, message: "请输入详情图片", trigger: "blur" },
   ],
-  product_status: [{ required: true, message: "请选择状态", trigger: "blur" }],
+  is_publish_product: [
+    { required: true, message: "请选择状态", trigger: "blur" },
+  ],
   stock: [{ required: true, message: "请输入库存", trigger: "change" }],
   retail_price: [
     { required: true, message: "请输入零售价格", trigger: "change" },
   ],
   total_sales: [{ required: true, message: "请输入总销量", trigger: "change" }],
+  category_ids: [
+    {
+      required: true,
+      message: "请选择分类",
+      trigger: "change", // 从 blur 改为 change，更适合多选场景
+      type: "array", // 指定类型为数组
+      min: 1, // 至少选择一项
+    },
+  ],
 };
 
 const handleClear = async () => {
@@ -362,10 +381,12 @@ const handleSubmit = async () => {
     if (productId.value) {
       submitData.id = productId.value;
     }
-    const response = productId.value ? await _http.updateProduct(submitData) : await _http.addProduct(submitData);
+    const response = productId.value
+      ? await _http.updateProduct(submitData)
+      : await _http.addProduct(submitData);
 
     console.log(response, "response", typeof response);
-    if (typeof response === "object") {
+    if (response) {
       // 假设成功状态码为 200
       ElMessageBox.confirm("创建商品成功", "提示", {
         confirmButtonText: "继续新增商品",
@@ -405,7 +426,7 @@ const getProductDetail = async (id) => {
       // 使用 cloneDeep 深拷贝数据到 form
       nextTick(() => {
         form.value = cloneDeep(formData);
-      })
+      });
       // 重新初始化表单验证
       if (formRef.value) {
         await formRef.value.clearValidate(); // 清空所有校验信息

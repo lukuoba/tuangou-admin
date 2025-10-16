@@ -90,8 +90,8 @@
         <el-table-column label="状态">
           <template #default="{ row }">
             <el-switch
-              v-model="row.product_status"
-              :inactive-text="row.product_status === 0 ? '禁用' : '启用'"
+              v-model="row.is_publish_product"
+              :inactive-text="row.is_publish_product === 0 ? '禁用' : '启用'"
               :active-value="1"
               :inactive-value="0"
               :loading="row.statusLoading"
@@ -128,7 +128,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const searchForm = reactive({
   store_id: null,
-  product_status: null,
+  is_publish_product: null,
   is_single_spec: null,
   product_name: null,
   category_id: null,
@@ -205,13 +205,13 @@ const handleStatusChange = async (row) => {
   try {
     // 调用修改状态接口
     const response = await _http.updateProductStatus({
-      ids: [row.id],
-      product_status: row.product_status,
+      id: row.id,
+      is_publish_product: row.is_publish_product,
     });
     ElMessage.success(response.message || "状态更新成功");
   } catch (error) {
     // 状态变更失败，恢复原状态
-    row.product_status = row.product_status === 1 ? 0 : 1;
+    row.is_publish_productatus = row.is_publish_productatus === 1 ? 0 : 1;
     ElMessage.error(error.message || "状态更新失败");
   } finally {
     row.statusLoading = false; // 关闭加载状态

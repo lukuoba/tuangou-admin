@@ -99,7 +99,7 @@
               />
             </template>
           </el-table-column>
-          <el-table-column label="状态">
+          <!-- <el-table-column label="状态">
             <template #default="{ row }">
               <el-switch
                 v-model="row.store_status"
@@ -110,7 +110,7 @@
                 @change="handleStatusChange(row)"
               />
             </template>
-          </el-table-column>
+          </el-table-column> -->
           <el-table-column label="备注" prop="remark" />
           <el-table-column label="创建者" prop="created_by" />
           <el-table-column label="更新者" prop="updated_by" />

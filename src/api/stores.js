@@ -56,7 +56,7 @@ export default {
   //   获取门店列表
   getStoresList(params) {
     return request({
-      url: '/api/store/selectStoreList',  // 接口路径
+      url: '/api/store/queryStoreList',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     })
@@ -114,11 +114,11 @@ export default {
       method: 'put',    // 请求方式
       data      // 请求参数
     })
-  },
+  }, 
   // 更新商品状态
   updateProductStatus(data) {
     return request({
-      url: `/api/product/updateProductStatus`,  // 接口路径
+      url: `/api/product/updateProductPublishStatus`,  // 接口路径
       method: 'put',    // 请求方式
       data      // 请求参数
     })
