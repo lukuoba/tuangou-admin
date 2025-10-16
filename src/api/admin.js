@@ -51,7 +51,7 @@ export default {
   // 查询登录日志列表
   getLoginLogList(params) {
     return request({
-      url: '/api/loginLog/selectLoginLogList',
+      url: '/api/loginLog/queryLoginLogList',
       method: 'get',
       params      // 请求参数
     })
@@ -59,7 +59,7 @@ export default {
   // 查询登录日志详情
   getLoginLogDetail(id) {
     return request({
-      url: `/api/loginLog/selectLoginLogInfo`,
+      url: `/api/loginLog/queryLoginLogInfo`,
       method: 'get',
       params: {
         id
@@ -69,7 +69,7 @@ export default {
   // 删除登录日志
   deleteLoginLog(id) {
     return request({
-      url: `/api/loginLog/deleteLoginLog`,
+      url: `/api/operateLog/deleteOperateLog`,
       method: 'delete',
       params: { ids: id }
     })
@@ -77,7 +77,7 @@ export default {
   // 查询操作日志列表
   getOperationLogList(params) {
     return request({
-      url: '/api/operateLog/selectOperateLogList',
+      url: '/api/operateLog/queryOperateLogList',
       method: 'get',
       params      // 请求参数
     })
@@ -85,7 +85,7 @@ export default {
   // 查询操作日志详情
   getOperationLogDetail(id) {
     return request({
-      url: `/api/operateLog/selectOperateLogInfo`,
+      url: `/api/operateLog/queryOperateLogInfo`,
       method: 'get',
       params: {
         id
@@ -117,7 +117,7 @@ export default {
   // 查询角色列表
   getRoleList(params) {
     return request({
-      url: '/api/role/selectRoleList',
+      url: '/api/role/queryRoleList',
       method: 'get',
       params      // 请求参数
     })
@@ -185,7 +185,7 @@ export default {
    */
   getRouteList(params) {
     return request({
-      url: '/api/route/selectRouteTree',
+      url: '/api/route/queryRouteTree',
       method: 'get',
       params      // 请求参数
     })

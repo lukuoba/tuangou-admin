@@ -20,7 +20,7 @@ export default {
   // 获取账号列表
   getUserList(params) {
     return request({
-      url: '/api/user/selectUserList',  // 接口路径
+      url: '/api/admin/queryAdminList',  // 接口路径
       method: 'get',    // 请求方式
       params      // 请求参数
     })
